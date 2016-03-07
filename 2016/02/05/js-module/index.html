@@ -1,0 +1,839 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="互联网,JavaScript,Web" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="李少鹏的网络日志" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《">
+<meta property="og:type" content="article">
+<meta property="og:title" content="后端程序员的 JavaScript 之旅 - 模块化（一）">
+<meta property="og:url" content="http://lishaopeng.com/2016/02/05/js-module/index.html">
+<meta property="og:site_name" content="李少鹏的网络日志">
+<meta property="og:description" content="ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《">
+<meta property="og:image" content="http://lishaopeng.com/./images/js-module-title.jpg">
+<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 模块化（一）">
+<meta name="twitter:description" content="ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 后端程序员的 JavaScript 之旅 - 模块化（一） | 李少鹏的网络日志 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?073678c76cddabb5e3dc07b783ff0304";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">李少鹏的网络日志</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">网络改变沉默的大多数</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu menu-left">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+      
+        <li class="menu-item menu-item-search">
+          <a href="#" class="st-search-show-outputs">
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'fKqe3aL4fXhgxFXssXhq','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                后端程序员的 JavaScript 之旅 - 模块化（一）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-02-05T14:21:23+08:00" content="2016-02-05">
+              2016-02-05
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/02/05/js-module/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/05/js-module/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/./images/js-module-title.jpg" alt="模块化"><br>ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《后端程序员的 JavaScript 之旅 - 模块化》系列将分多个篇幅分别介绍 JavaScript 模块化实现的基本原理、模块化规范、业内比较流行的加载器以及 ES 6 的模块特性。阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/10/javascript_module.html" target="_blank" rel="external">《Javascript 模块化编程》</a>系列对模块化的内容有精彩的描述，这个系列写在 2012 年，JavaScript 生态圈在近几年发生了日新月异的变化，我会尝试增加一些新的内容。<br>本文全面介绍 <a href="http://www.adequatelygood.com/" target="_blank" rel="external">Ben Cherry</a> 在 <a href="http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html" target="_blank" rel="external">JavaScript Module Pattern: In-Depth</a> 一文中提到的 JavaScript 模块化设计模式。<br><a id="more"></a></p>
+<h2 id="u57FA_u7840_u6A21_u5F0F"><a href="#u57FA_u7840_u6A21_u5F0F" class="headerlink" title="基础模式"></a>基础模式</h2><h3 id="u533F_u540D_u95ED_u5305"><a href="#u533F_u540D_u95ED_u5305" class="headerlink" title="匿名闭包"></a>匿名闭包</h3><p>匿名闭包是很常用的代码隔离方式，声明匿名对象并立即执行。匿名函数中声明的变量和方法以及匿名函数本身不会污染到函数体外，同时匿名函数的调用形成一个闭包，使函数体内可以使用函数体外声明的变量和方法。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="comment">// ... all vars and functions are in this scope only</span></span><br><span class="line">	<span class="comment">// still maintains access to all globals</span></span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<h3 id="u5168_u5C40_u5BFC_u5165"><a href="#u5168_u5C40_u5BFC_u5165" class="headerlink" title="全局导入"></a>全局导入</h3><p>我们知道 JavaScript 全局变量的作用域贯穿全局，在函数内也可以使用甚至声明全局变量，这样很容易导致代码混乱难以管理。<br>全局导入模式是匿名闭包的一个变种，增加参数导入全局变量，约定在匿名函数内部只能通过导入的参数访问外部的模块，从而使模块间的依赖清晰，便于管理。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">$, YAHOO</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// now have access to globals jQuery (as $) and YAHOO in this code</span></span><br><span class="line">&#125;(jQuery, YAHOO));</span><br></pre></td></tr></table></figure></p>
+<p>这种约定不能强制阻止函数体内部访问全局变量，其中一个解决方案是把所有的模块都使用这种方式处理，仅把模块本身导出到全局变量，这样就可以极大减少全局变量的使用。</p>
+<h3 id="u6A21_u5757_u5BFC_u51FA"><a href="#u6A21_u5757_u5BFC_u51FA" class="headerlink" title="模块导出"></a>模块导出</h3><p>模块导出就是将立即执匿名函数的结果返回赋值给一个全局变量。匿名函数仅将开放的对象返回，其内部定义的变量、函数仍然对外部不可见。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;,</span><br><span class="line">		privateVariable = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">privateMethod</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	my.moduleProperty = <span class="number">1</span>;</span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<h2 id="u8FDB_u9636_u6A21_u5F0F"><a href="#u8FDB_u9636_u6A21_u5F0F" class="headerlink" title="进阶模式"></a>进阶模式</h2><h3 id="u6269_u5145_u6A21_u5F0F"><a href="#u6269_u5145_u6A21_u5F0F" class="headerlink" title="扩充模式"></a>扩充模式</h3><p>JavaScript 对象支持热扩充，结合全局导入模式，我们可以将模块进行扩充。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	my.anotherMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// added method...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure></p>
+<p>这种模式假定 MODULE 已经声明过，如果没有声明调用会出错。</p>
+<h3 id="u5BBD_u6269_u5145_u6A21_u5F0F"><a href="#u5BBD_u6269_u5145_u6A21_u5F0F" class="headerlink" title="宽扩充模式"></a>宽扩充模式</h3><p>宽扩充模式通过一个技巧，调用匿名函数传递 <code>MODULE || {}</code> 作为参数，解决 MODULE 如果未事先申明调用出错的问题。这个模式还隐藏着一个妙处，就是多个扩充模式可以并行地被调用不被堵塞。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// add capabilities...</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE || &#123;&#125;));</span><br></pre></td></tr></table></figure></p>
+<h3 id="u7D27_u6269_u5145_u6A21_u5F0F"><a href="#u7D27_u6269_u5145_u6A21_u5F0F" class="headerlink" title="紧扩充模式"></a>紧扩充模式</h3><p>宽扩充模式非常棒，但是有一个缺点是对无法安全地处理方法属性的重载。紧扩充模式保持对旧有方法的的引用，在定义的新方法中可以灵活地重用旧有方法的功能。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> old_moduleMethod = my.moduleMethod;</span><br><span class="line"></span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// method override, has access to old through old_moduleMethod...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure></p>
+<h3 id="u514B_u9686_u548C_u7EE7_u627F"><a href="#u514B_u9686_u548C_u7EE7_u627F" class="headerlink" title="克隆和继承"></a>克隆和继承</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE_TWO = (<span class="function"><span class="keyword">function</span> (<span class="params">old</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;,</span><br><span class="line">		key;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (key <span class="keyword">in</span> old) &#123;</span><br><span class="line">		<span class="keyword">if</span> (old.hasOwnProperty(key)) &#123;</span><br><span class="line">			my[key] = old[key];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> super_moduleMethod = old.moduleMethod;</span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// override method on the clone, access to super through super_moduleMethod</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure>
+<p>克隆和继承模式差不多是对原有模块影响最小的模块重用方式，这种模式通浅克隆旧模块属性的方式进行重用，可以结合紧扩充模式处理方法重载的问题。需要注意的是，这是一种浅克隆，当旧模块的属性是对象的时候，针对这个对象的修改，将会对新旧两个模块相互影响。</p>
+<h3 id="u8DE8_u6587_u4EF6_u79C1_u6709_u72B6_u6001"><a href="#u8DE8_u6587_u4EF6_u79C1_u6709_u72B6_u6001" class="headerlink" title="跨文件私有状态"></a>跨文件私有状态</h3><p>当一个模块分拆成多个文件，使用宽扩充模式会发现一个限制，各文件中的方法会维护自己的私有状态而无法在模块的多个文件中共享，下面的一个示例展示如何在这种情况下对私有状态再同一个模块见共享。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _private = my._private = my._private || &#123;&#125;,</span><br><span class="line">		_seal = my._seal = my._seal || <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">			<span class="keyword">delete</span> my._private;</span><br><span class="line">			<span class="keyword">delete</span> my._seal;</span><br><span class="line">			<span class="keyword">delete</span> my._unseal;</span><br><span class="line">		&#125;,</span><br><span class="line">		_unseal = my._unseal = my._unseal || <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">			my._private = _private;</span><br><span class="line">			my._seal = _seal;</span><br><span class="line">			my._unseal = _unseal;</span><br><span class="line">		&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// permanent access to _private, _seal, and _unseal</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE || &#123;&#125;));</span><br></pre></td></tr></table></figure>
+<p>每个文件维护一个本地变量 <code>_private</code>，用于分享给别的模块。当模块被加载之后，调用 <code>MODULE._seal</code> 销毁本地变量 <code>_private</code> 的外部访问属性。如果模块需要扩充，加载文件之前调用 <code>_unseal</code> 将本地变量 <code>_private</code> 输出到外部访问的属性，加载之后，调用  <code>_seal</code> 销毁外部访问的属性。 </p>
+<h3 id="u5B50_u6A21_u5757"><a href="#u5B50_u6A21_u5757" class="headerlink" title="子模块"></a>子模块</h3><p>子模块就是将模块的属性也定义为模块，可以灵活使用上面提到的各种模式。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MODULE.sub = (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<p>后端程序员的 JavaScript 之旅 - 模块化系列文章：<br><a href="http://lishaopeng.com/2016/02/05/js-module/">后端程序员的 JavaScript 之旅 - 模块化（一）</a> | <a href="http://www.jianshu.com/p/590003321975" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/11/js-module2/">后端程序员的 JavaScript 之旅 - 模块化（二）</a> | <a href="http://www.jianshu.com/p/86cca0c4447d" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/19/js-module3/">后端程序员的 JavaScript 之旅 - 模块化（三）</a> | <a href="http://www.jianshu.com/p/4ac788a67d11" target="_blank" rel="external">简书</a></p>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag">#JavaScript</a>
+          
+            <a href="/tags/JavaScript-之旅系列/" rel="tag">#JavaScript 之旅系列</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/29/js-ecma-262/" rel="next" title="ECMA-262 in detail">
+                <i class="fa fa-chevron-left"></i> ECMA-262 in detail
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/11/js-module2/" rel="prev" title="后端程序员的 JavaScript 之旅 - 模块化（二）">
+                后端程序员的 JavaScript 之旅 - 模块化（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/02/05/js-module/"
+           data-title="后端程序员的 JavaScript 之旅 - 模块化（一）" data-url="http://lishaopeng.com/2016/02/05/js-module/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/benja.jpg"
+               alt="李少鹏" />
+          <p class="site-author-name" itemprop="name">李少鹏</p>
+          <p class="site-description motion-element" itemprop="description">互联网相关技术博客</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+          
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> 微博
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/lisphi" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 豆瓣
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/benjali" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 知乎
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/users/C1y1Jt" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 简书
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://toutiao.io/subjects/62167" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 头条
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u57FA_u7840_u6A21_u5F0F"><span class="nav-number">1.</span> <span class="nav-text">基础模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u533F_u540D_u95ED_u5305"><span class="nav-number">1.1.</span> <span class="nav-text">匿名闭包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5168_u5C40_u5BFC_u5165"><span class="nav-number">1.2.</span> <span class="nav-text">全局导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u6A21_u5757_u5BFC_u51FA"><span class="nav-number">1.3.</span> <span class="nav-text">模块导出</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u8FDB_u9636_u6A21_u5F0F"><span class="nav-number">2.</span> <span class="nav-text">进阶模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6269_u5145_u6A21_u5F0F"><span class="nav-number">2.1.</span> <span class="nav-text">扩充模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5BBD_u6269_u5145_u6A21_u5F0F"><span class="nav-number">2.2.</span> <span class="nav-text">宽扩充模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u7D27_u6269_u5145_u6A21_u5F0F"><span class="nav-number">2.3.</span> <span class="nav-text">紧扩充模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u514B_u9686_u548C_u7EE7_u627F"><span class="nav-number">2.4.</span> <span class="nav-text">克隆和继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u8DE8_u6587_u4EF6_u79C1_u6709_u72B6_u6001"><span class="nav-number">2.5.</span> <span class="nav-text">跨文件私有状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5B50_u6A21_u5757"><span class="nav-number">2.6.</span> <span class="nav-text">子模块</span></a></li></ol></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <!--
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  -->
+  <span class="author" itemprop="copyrightHolder">李少鹏</span>
+</div>
+
+<div class="powered-by">
+  pwoered by <a class="theme-link" href="http://hexo.io">Hexo</a> 
+</div>
+
+<div class="theme-info">
+  theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  
+
+
+  
+
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=0.5.0"></script>
+
+
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"lishaopeng"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+
+  
+  
+
+
+</body>
+</html>

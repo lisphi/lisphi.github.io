@@ -1,0 +1,837 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="互联网,JavaScript,Web" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="李少鹏的网络日志" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包">
+<meta property="og:url" content="http://lishaopeng.com/2016/01/27/js-closure/index.html">
+<meta property="og:site_name" content="李少鹏的网络日志">
+<meta property="og:description" content="JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法">
+<meta property="og:image" content="http://lishaopeng.com/./images/js-closure-title.jpg">
+<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包">
+<meta name="twitter:description" content="JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包 | 李少鹏的网络日志 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?073678c76cddabb5e3dc07b783ff0304";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">李少鹏的网络日志</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">网络改变沉默的大多数</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu menu-left">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+      
+        <li class="menu-item menu-item-search">
+          <a href="#" class="st-search-show-outputs">
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'fKqe3aL4fXhgxFXssXhq','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-01-27T18:11:57+08:00" content="2016-01-27">
+              2016-01-27
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/01/27/js-closure/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/27/js-closure/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/./images/js-closure-title.jpg" alt="作用域链、执行上下文与闭包"><br>JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法上的表达式一致的，f 被调用之后返回的是<code>local scope</code>。函数对象 f 在其主体函数 foo 调用结束之后，依然保持着 foo 函数体作用域变量的引用，这就是所谓的闭包 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scope;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> f = foo();</span><br><span class="line">f(); <span class="comment">// 返回 "local scope"</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>那么闭包到底是如何工作的呢？了解闭包首先需要了解变量作用域和作用域链，另外一个重要的概念是执行上下文环境。</p>
+<h2 id="u53D8_u91CF_u4F5C_u7528_u57DF"><a href="#u53D8_u91CF_u4F5C_u7528_u57DF" class="headerlink" title="变量作用域"></a>变量作用域</h2><p>JavaScript 中全局变量拥有全局的作用域，函数体内申明的变量的作用域是整个函数体内，是局部的，当然也包括函数体内定义的嵌套函数。函数体内局部变量的优先级高于全局变量，如果局部变量与全局变量重名，全局变量会被局部变量掩盖；同样嵌套函数内定义的局部变量的优先级高于嵌套函数所在函数的局部变量。这简直是显而易见的，几乎所有人都了解。<br>接下来谈谈可能大家比较陌生的。</p>
+<h3 id="u51FD_u6570_u58F0_u660E_u63D0_u5347"><a href="#u51FD_u6570_u58F0_u660E_u63D0_u5347" class="headerlink" title="函数声明提升"></a>函数声明提升</h3><p>用一句话来说明函数申明提升，指的是函数体内部申明的变量再整个函数内有效。也就是说，就是在函数体最底部申明的变量，也会被提升到最顶部。举个例子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(scope); <span class="comment">// 这里不会打印出 "global scope"，而是 "undefined"</span></span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>; </span><br><span class="line">    <span class="built_in">console</span>.log(scope); <span class="comment">// 很显然，打印出 "local scope"</span></span><br><span class="line">&#125;</span><br><span class="line">foo();</span><br></pre></td></tr></table></figure></p>
+<p>第一个<code>console.log(scope)</code>会打印出<code>undefined</code>而不是<code>global scope</code>，是因为局部变量的申明被提升了，只是还未赋值。</p>
+<h3 id="u4F5C_u4E3A_u5C5E_u6027_u7684_u53D8_u91CF"><a href="#u4F5C_u4E3A_u5C5E_u6027_u7684_u53D8_u91CF" class="headerlink" title="作为属性的变量"></a>作为属性的变量</h3><p>在 JavaScript 中，有三种定义全局变量的方式，如下示例代码中的 globalVal1 、globalVal2 和 globalValue3 。一个有趣的现象是，实际上全局变量仅仅只是全局对象 window/global （在浏览器中是 window，在 node.js 中是 global）的属性而已。为了更加符合通常意义的变量定义， JavaScript 把用 var 定义的全局变量，设计成了不可删除的全局对象属性。 通过<code>Object.getOwnPropertyDescriptor(this, &#39;globalVal1&#39;)</code>可以得到，其 configurable 属性为 false 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> globalVal1 = <span class="number">1</span>; <span class="comment">// 不可删除的全局变量</span></span><br><span class="line">globalVal2 = <span class="number">2</span>; <span class="comment">// 可删除的全局变量</span></span><br><span class="line"><span class="keyword">this</span>.globalValue3 = <span class="number">3</span>; <span class="comment">// 同 globalValue2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> globalVal1; <span class="comment">// =&gt; false 变量没有被删除</span></span><br><span class="line"><span class="keyword">delete</span> globalVal2; <span class="comment">// =&gt; true 变量被删除</span></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">this</span>.globalValue3; <span class="comment">//=&gt; true 变量被删除</span></span><br></pre></td></tr></table></figure></p>
+<p>那么问题来了，函数体内定义的局部变量是不是也作为某个对象的属性呢？答案是肯定的。这个对象是跟函数调用相关的，在 ECMAScript 3中称为“call object”、ECMAScript 5中称为“declaravite environment record”的对象。这个特殊的对象对我们来说是一种不可见的内部实现。</p>
+<h3 id="u4F5C_u7528_u57DF_u94FE"><a href="#u4F5C_u7528_u57DF_u94FE" class="headerlink" title="作用域链"></a>作用域链</h3><p>从上一节我们知道，函数局部变量可与看做是某个不可见的对象的属性。那么 JavaScript 的词法作用域的实现可以这样描述：每一段 JavaScript 代码（全局或函数）都有一个跟它关联的作用域链，它可以是数组或链表结构；作用域链中的每一个元素定义了一组作用域内的变量；当我们要查找变量 x 的值，那么从作用域链的第一个元素中找这个变量，如果没有找到者找链表中的下一个元素中查找，直到找到或抵达链尾。了解作用域链的概念对理解闭包至关重要。</p>
+<h2 id="u6267_u884C_u4E0A_u4E0B_u6587"><a href="#u6267_u884C_u4E0A_u4E0B_u6587" class="headerlink" title="执行上下文"></a>执行上下文</h2><p>每段 JavaScript 代码的执行都与执行上下文绑定，运行的代码通过执行上下文获可用的变量、函数、数据等信息。全局的执行上下文是唯一的，与全局代码绑定，每执行一个函数都会创建一个执行上下文与其绑定。JavaScript 通过栈的数据结构维护执行上下文，全局执行上下文位于栈底，当执行一个函数的时候，新创建的函数执行上下文将会压入栈中，执行上下文指针指向栈顶，运行的代码即可获得当前执行的函数绑定的执行上下文。如果函数体执行嵌套的函数，也会创建执行上下文并压入栈，指针指向栈顶，当嵌套函数运行结束后，与它绑定的执行上下文被推出栈，指针重新指向函数绑定的执行上下文。同样，函数执行结束，指针会指向全局执行上下文。<br>执行上下文可以描述成式一个包含变量对象（对应全局）/活动对象（对应函数）、作用域链和 this 的数据结构。当一个函数执行时，活动对象被创建并绑定到执行上下文。活动对象包括函数体内申明的变量、函数、arguments 等。作用域链在上一节以及提到，是按词法作用域构建的。需要注意的是 this 不属于活动对象，在函数执行的那一刻就以及确定。<br>执行上下文的创建是有特定的次序和阶段的，不同阶段有不同的状态，具体的细节可以看一下参考资料，在结尾部分会列出。</p>
+<h2 id="u95ED_u5305"><a href="#u95ED_u5305" class="headerlink" title="闭包"></a>闭包</h2><p>了解了作用域链和执行上下文，回过头看篇首的那段代码，基本上就可以解释闭包式如何工作了。函数调用的时候创建的执行上下文以及词法作用域链保持函数调用所需要的信息， f 函数调用之后才可以返回<code>local scope</code>。<br>需要注意的是，函数内定义的多个函数使用的是同一个作用域链，在使用 for 循环赋值匿名函数对象的场景比较容易引起错误，举例如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    arr[i] = &#123;</span><br><span class="line">        func: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">arr[<span class="number">0</span>].func(); <span class="comment">// 返回 10，而不是 0</span></span><br></pre></td></tr></table></figure></p>
+<p><code>arr[0].func()</code>返回的是 10 而不是 0，跟感官上的语义有偏差。在 ECMAScript 6 引入 let 之前， 变量作用域范围是在整个函数体内而不是在代码区块之内，所以上面的例子中所有定义的 func 函数引用了同一个作用域链在 for 循环之后， i 的值已经变为 10 。<br>正确的做法是这样：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    arr[i] = &#123;</span><br><span class="line">        func: getFunc(i)</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFunc</span>(<span class="params">i</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">arr[<span class="number">0</span>].func(); <span class="comment">// 返回 0</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>参考</strong><br><a href="http://book.douban.com/subject/5303032/" target="_blank" rel="external">JavaScript: The Definitive Guide</a><br><a href="http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/" target="_blank" rel="external">What is the Execution Context &amp; Stack in JavaScript?</a><br><a href="http://ryanmorr.com/understanding-scope-and-context-in-javascript/" target="_blank" rel="external">Understanding Scope and Context in JavaScript</a><br><a href="http://lishaopeng.com/2016/01/29/js-ecma-262/">ECMA-262 in detail</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/01/27/js-closure/">后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包</a><br>简书：<a href="http://www.jianshu.com/p/44451236a646" target="_blank" rel="external">后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包</a></p>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag">#JavaScript</a>
+          
+            <a href="/tags/JavaScript-之旅系列/" rel="tag">#JavaScript 之旅系列</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/24/js-object-system/" rel="next" title="后端程序员的 JavaScript 之旅 - JavaScript 对象系统">
+                <i class="fa fa-chevron-left"></i> 后端程序员的 JavaScript 之旅 - JavaScript 对象系统
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/29/js-ecma-262/" rel="prev" title="ECMA-262 in detail">
+                ECMA-262 in detail <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/27/js-closure/"
+           data-title="后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包" data-url="http://lishaopeng.com/2016/01/27/js-closure/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/benja.jpg"
+               alt="李少鹏" />
+          <p class="site-author-name" itemprop="name">李少鹏</p>
+          <p class="site-description motion-element" itemprop="description">互联网相关技术博客</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+          
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> 微博
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/lisphi" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 豆瓣
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/benjali" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 知乎
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/users/C1y1Jt" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 简书
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://toutiao.io/subjects/62167" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 头条
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u53D8_u91CF_u4F5C_u7528_u57DF"><span class="nav-number">1.</span> <span class="nav-text">变量作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u51FD_u6570_u58F0_u660E_u63D0_u5347"><span class="nav-number">1.1.</span> <span class="nav-text">函数声明提升</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4F5C_u4E3A_u5C5E_u6027_u7684_u53D8_u91CF"><span class="nav-number">1.2.</span> <span class="nav-text">作为属性的变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4F5C_u7528_u57DF_u94FE"><span class="nav-number">1.3.</span> <span class="nav-text">作用域链</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u6267_u884C_u4E0A_u4E0B_u6587"><span class="nav-number">2.</span> <span class="nav-text">执行上下文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u95ED_u5305"><span class="nav-number">3.</span> <span class="nav-text">闭包</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <!--
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  -->
+  <span class="author" itemprop="copyrightHolder">李少鹏</span>
+</div>
+
+<div class="powered-by">
+  pwoered by <a class="theme-link" href="http://hexo.io">Hexo</a> 
+</div>
+
+<div class="theme-info">
+  theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  
+
+
+  
+
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=0.5.0"></script>
+
+
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"lishaopeng"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+
+  
+  
+
+
+</body>
+</html>

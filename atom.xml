@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[李少鹏的网络日志]]></title>
+  <subtitle><![CDATA[网络改变沉默的大多数]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://lishaopeng.com/"/>
+  <updated>2016-03-07T16:11:34.697Z</updated>
+  <id>http://lishaopeng.com/</id>
+  
+  <author>
+    <name><![CDATA[李少鹏]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 回调地狱终结者]]></title>
+    <link href="http://lishaopeng.com/2016/03/06/js-cbhell/"/>
+    <id>http://lishaopeng.com/2016/03/06/js-cbhell/</id>
+    <published>2016-03-06T08:29:16.000Z</published>
+    <updated>2016-03-07T16:11:34.697Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-cbhell-title.jpg" alt="回调地狱总结者"></p>
+<h2 id="u56DE_u8C03_u5730_u72F1"><a href="#u56DE_u8C03_u5730_u72F1" class="headerlink" title="回调地狱"></a>回调地狱</h2><p>对 JavaScript 程序员来说，处理回调是家常，但是处理层次过深的回调就没有那么美好了，下面的示例代码片段用了三层回调，再补脑一下更多层的场景，简直是酸爽，这就是传说中的回调地狱。<a id="more"></a><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">getDirectories(<span class="function"><span class="keyword">function</span>(<span class="params">dirs</span>) </span>&#123;</span><br><span class="line">    getFiles(dirs[<span class="number">0</span>], <span class="function"><span class="keyword">function</span>(<span class="params">files</span>) </span>&#123;</span><br><span class="line">        getContent(files[<span class="number">0</span>], <span class="function"><span class="keyword">function</span>(<span class="params">file, content</span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'filename:'</span>, file);</span><br><span class="line">            <span class="built_in">console</span>.log(content);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getDirectories</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    callback([<span class="string">'/home/ben'</span>]);</span><br><span class="line">  &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFiles</span>(<span class="params">dir, callback</span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        callback([dir + <span class="string">'/test1.txt'</span>, dir + <span class="string">'/test2.txt'</span>]);</span><br><span class="line">    &#125;, <span class="number">1000</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getContent</span>(<span class="params">file, callback</span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        callback(file, <span class="string">'content'</span>);</span><br><span class="line">    &#125;, <span class="number">1000</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="u89E3_u51B3_u65B9_u6848"><a href="#u89E3_u51B3_u65B9_u6848" class="headerlink" title="解决方案"></a>解决方案</h2><p>生态圈中有很多异步解决方案可以处理回调地狱的问题，比如 <a href="http://bluebirdjs.com" target="_blank" rel="external">bluebird</a>、<a href="https://github.com/kriskowal/q" target="_blank" rel="external">Q</a> 等，本文重点介绍 ECMAScript 6/7 规范中对异步编程的支持。</p>
+<h3 id="ES6_Promise"><a href="#ES6_Promise" class="headerlink" title="ES6 Promise"></a>ES6 Promise</h3><p>Promise 是一种异步编程的解决方案，是解决回调地狱问题的利器。<br>Promise 在 JavaScript 生态圈被主流接受是在 2007 年 Dojo 框架增加了 dojo.Deferred 的功能。随着 dojo.Deferred 的流行，在 2009 年 Kris Zyp 提出了 CommonJS Promises/A 规范。随后生态圈中出现了大量 Promise 实现包括 <a href="https://github.com/kriskowal/q" target="_blank" rel="external">Q.js</a>、<a href="https://github.com/FuturesJS" target="_blank" rel="external">FuturesJS</a> 等。当然 Promise 之所有这么流行很大程度上是由于 jQuery 的存在，只是 jQuery 并不完全遵守 CommonJS Promises/A 规范。随后正如大家看到的，ES 6 规范包含了 Promise。<br>MDN 中对 Promise 是这样描述的：</p>
+<blockquote>
+<p>Promise 对象是一个返回值的代理，这个返回值在promise对象创建时未必已知。它允许你为异步操作的成功或失败指定处理方法。 这使得异步方法可以像同步方法那样返回值：异步方法会返回一个包含了原返回值的 </p>
+</blockquote>
+<p>以下的代码是「回调地狱」一节中的示例通过 Promise 实现，看上去代码也不是很简洁，但是比起传统的层级回调有明显改善，代码可维护性和可读性更强。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">getDirectories().then(<span class="function"><span class="keyword">function</span>(<span class="params">dirs</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getFiles(dirs[<span class="number">0</span>]);</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">files</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getContent(files[<span class="number">0</span>]);</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'filename:'</span>, val.file);</span><br><span class="line">    <span class="built_in">console</span>.log(val.content);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getDirectories</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        resolve([<span class="string">'/home/ben'</span>]);</span><br><span class="line">      &#125;, <span class="number">1000</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFiles</span>(<span class="params">dir</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            resolve([dir + <span class="string">'/test1.txt'</span>, dir + <span class="string">'/test2.txt'</span>]);</span><br><span class="line">        &#125;, <span class="number">1000</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getContent</span>(<span class="params">file</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            resolve(&#123;file: file, content: <span class="string">'content'</span>&#125;);</span><br><span class="line">        &#125;, <span class="number">1000</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="ES6_Generator"><a href="#ES6_Generator" class="headerlink" title="ES6 Generator"></a>ES6 Generator</h3><p>Promise 的实现方式还不够简洁，我们还需要更好的选择，<a href="https://github.com/tj/co" target="_blank" rel="external">co</a> 就是选择之一。co 是基于 Generator（生成器）的异步流控制器，了解 co 之前首先需要理解 Generator。熟悉 C# 的同学应该都有了解，C# 2.0 的版本就引入了 yield 关键字，用于迭代生成器。ES 6 Generator 跟 C# 相似，也使用了 yield 语法糖，内部实现了状态机。具体用法可以参考 <a href="https://github.com/tj/co" target="_blank" rel="external">MDN 的文档 function*</a> 一节，原理可以参考AlloyTeam 团队 Blog <a href="http://www.alloyteam.com/2016/02/generators-in-depth/" target="_blank" rel="external">深入理解 Generator</a>。使用 co 巧妙结合 ES6 Generator 和 ES6 Promise 让异步调用更加和谐。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">co(<span class="function"><span class="keyword">function</span>* (<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> dirs = <span class="keyword">yield</span> getDirectories();</span><br><span class="line">    <span class="keyword">var</span> files = <span class="keyword">yield</span> getFiles(dirs[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">var</span> contentVal = <span class="keyword">yield</span> getContent(files[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'filename:'</span>, contentVal.file);</span><br><span class="line">    <span class="built_in">console</span>.log(contentVal.content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>co 非常巧妙，其核心代码可以简化如下的示例，大体思路是采用递归遍历生成器直到状态完成，当然 co 做的跟多。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">runGenerator();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">run</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> dirs = <span class="keyword">yield</span> getDirectories();</span><br><span class="line">    <span class="keyword">var</span> files = <span class="keyword">yield</span> getFiles(dirs[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">var</span> contentVal = <span class="keyword">yield</span> getContent(files[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'filename:'</span>, contentVal.file);</span><br><span class="line">    <span class="built_in">console</span>.log(contentVal.content);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">runGenerator</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> gen = run();</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">go</span>(<span class="params">result</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(result.done) <span class="keyword">return</span>;</span><br><span class="line">        result.value.then(<span class="function"><span class="keyword">function</span>(<span class="params">r</span>)</span>&#123;</span><br><span class="line">            go(gen.next(r));</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    go(gen.next());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="ES7_Async/Await"><a href="#ES7_Async/Await" class="headerlink" title="ES7 Async/Await"></a>ES7 Async/Await</h3><p>ES6 Generator 确实很好，只可惜需要第三方库的支持。好消息是 ES 7 会引入 Async/Await 关键字完美解决异步调用的问题。好吧，.net 又领先了一步，.net framework 4.5 已经率先支持了。<br>今后的代码写起来是这样：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">run();</span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">run</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> dirs = <span class="keyword">await</span> getDirectories();</span><br><span class="line">    <span class="keyword">var</span> files = <span class="keyword">await</span> getFiles(dirs[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">var</span> contentVal = <span class="keyword">await</span> getContent(files[<span class="number">0</span>]);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'filename:'</span>, contentVal.file);</span><br><span class="line">    <span class="built_in">console</span>.log(contentVal.content);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="u7ED3_u8BBA"><a href="#u7ED3_u8BBA" class="headerlink" title="结论"></a>结论</h2><p>从经典的回调的异步编程方式，到 ES6 Promise 规范对异步编程的改善，再到 co 结合 ES Generator 优雅处理，最后 ES7 async/await 完美收官，可以让我们了解为什么 ECMAScript 会出现这些特性以及解决了什么问题，更加清晰地看到 JavaScript 异步编程发展的脉络。</p>
+<p>参考：<br><a href="https://book.douban.com/subject/21357366/" target="_blank" rel="external">Async JavaScript</a><br><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" target="_blank" rel="external">MDN JavaScript reference - Promise</a><br><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*" target="_blank" rel="external">MDN JavaScript reference - function*</a><br><a href="http://www.alloyteam.com/2016/02/generators-in-depth/" target="_blank" rel="external">深入理解 Generator</a><br><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6入门</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/03/06/js-cbhell/">后端程序员的 JavaScript 之旅 - 回调地狱终结者</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-cbhell-title.jpg" alt="回调地狱总结者"></p>
+<h2 id="u56DE_u8C03_u5730_u72F1"><a href="#u56DE_u8C03_u5730_u72F1" class="headerlink" title="回调地狱"></a>回调地狱</h2><p>对 JavaScript 程序员来说，处理回调是家常，但是处理层次过深的回调就没有那么美好了，下面的示例代码片段用了三层回调，再补脑一下更多层的场景，简直是酸爽，这就是传说中的回调地狱。]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准]]></title>
+    <link href="http://lishaopeng.com/2016/02/26/js-spec/"/>
+    <id>http://lishaopeng.com/2016/02/26/js-spec/</id>
+    <published>2016-02-26T13:35:43.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-spec-title.jpg" alt="JavaScript 的版本与标准"><br>浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera 以及 Microsoft Edge 等，中国市场也有许多本土企业推出的浏览器，比较有代表性的有 360 安全浏览器、搜狗高速浏览器、QQ 浏览器、遨游浏览器等。这一直就让我非常疑惑，浏览器中使用的 JavaScript 到底是什么版本呢？ 回答这个问题首先要从 JavaScript 的历史说起。<br><a id="more"></a></p>
+<h2 id="JavaScript__u5386_u53F2"><a href="#JavaScript__u5386_u53F2" class="headerlink" title="JavaScript 历史"></a>JavaScript 历史</h2><p>1995 年 5 月 JavaScript 的最初版本由网景公司的工程师 Brendan Eich 开发，目的是为了跟微软公司的 Web 技术平台竞争。JavaScript 最初随 Netscape Navigator 2.0 发布时的名称为 LiveScript，后来由于跟 Sun 公司合作为了市场原因把名称改为 JavaScript。需要指出的是，JavaScript 一开始就不仅仅使用在浏览器端，网景公司还将它应用在了 Netscape Enterprise Server 这个服务端的产品上。1996 年，微软公司通过对 JavaScript 的反向工程实现了自己的相类似的技术 JScript，这个领域的竞争出现了网景、Sun 以及微软三足鼎立的格局。1997 年，在ECMA（欧洲计算机制造商协会）的协调下，由网景、Sun、微软、Borland 组成的工作组确定统一标准：ECMA-262。我们通常所说的 ECMAScript 指得就是 ECMA-262，从此各大厂商提供 ECMA-262 的不同实现。从这个方面上说，刚开始提到的浏览器使用的 JavaScript 到底是什么版本这个问题不太准确。更准确的描述应该是问具体厂商实现 ECMA-262 标准的 JavaScript 引擎产品是什么版本。另外，ECMA-262 也在进化，也是按版本迭代的。由于 JavaScript 最初是由网景公司提出来的，我们通常按网景公司的实现做蓝本描述 JavaScript 的版本。</p>
+<h2 id="JavaScript__u7248_u672C"><a href="#JavaScript__u7248_u672C" class="headerlink" title="JavaScript 版本"></a>JavaScript 版本</h2><p>图中列出 JavaScript 版本与 ECMAScript 、各大厂商浏览器的对应关系。<br><img src="/./images/js-spec-version.png" alt="JavaScript 版本"></p>
+<h2 id="ECMAScript__u7248_u672C"><a href="#ECMAScript__u7248_u672C" class="headerlink" title="ECMAScript 版本"></a>ECMAScript 版本</h2><p><img src="/./images/js-spec-ecma.png" alt="JavaScript 版本"></p>
+<p>参考：<br><a href="https://en.wikipedia.org/wiki/JavaScript" target="_blank" rel="external">JavaScript</a><br><a href="https://en.wikipedia.org/wiki/ECMAScript" target="_blank" rel="external">ECMAScript</a><br><a href="https://en.wikipedia.org/wiki/JavaScript_engine" target="_blank" rel="external">JavaScript engine</a><br><a href="https://en.wikipedia.org/wiki/Web_browser" target="_blank" rel="external">Web Browser</a><br><a href="https://en.wikipedia.org/wiki/List_of_web_browsers" target="_blank" rel="external">List of web browsers</a><br><a href="https://en.wikipedia.org/wiki/Web_browser_engine" target="_blank" rel="external">Web browser engine</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/02/26/js-spec/">后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-spec-title.jpg" alt="JavaScript 的版本与标准"><br>浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera 以及 Microsoft Edge 等，中国市场也有许多本土企业推出的浏览器，比较有代表性的有 360 安全浏览器、搜狗高速浏览器、QQ 浏览器、遨游浏览器等。这一直就让我非常疑惑，浏览器中使用的 JavaScript 到底是什么版本呢？ 回答这个问题首先要从 JavaScript 的历史说起。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 模块化（三）]]></title>
+    <link href="http://lishaopeng.com/2016/02/19/js-module3/"/>
+    <id>http://lishaopeng.com/2016/02/19/js-module3/</id>
+    <published>2016-02-19T12:41:37.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br>这篇文章是「模块化」系列的最后一篇，聊一聊前端模块加载器。上一篇文章<a href="http://lishaopeng.com/2016/02/11/js-module2/">《模块化（二）》</a>中提到的实现 AMD 规范的 RequireJS 就是一种比较常用的模块加载器，除此之外比较常用的有 Browserify 和 Webpack，接下来逐一介绍。<br><a id="more"></a></p>
+<h2 id="Browserify"><a href="#Browserify" class="headerlink" title="Browserify"></a>Browserify</h2><p>npm 的模块非常丰富，但是其模块符合 CommonJS 规范，对浏览器不友好。Browserify 就是为了解决这个问题而生，递归分析应用中 <code>require()</code> 的调用顺序，将所有依赖的模块打包成一个 js 文件，浏览器通过一个 <code>&lt;script&gt;</code> 标签即可加载。<br>接下来再以 browserify 实现前两篇文章中的示例。</p>
+<p>前提：node 和 npm 环境准备就绪，jQuery 已安装。</p>
+<h3 id="u5B89_u88C5_browserify"><a href="#u5B89_u88C5_browserify" class="headerlink" title="安装 browserify"></a>安装 browserify</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g browserify</span><br></pre></td></tr></table></figure>
+<h3 id="www/scripts__u76EE_u5F55"><a href="#www/scripts__u76EE_u5F55" class="headerlink" title="www/scripts 目录"></a>www/scripts 目录</h3><p>math.js<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">exports.add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>increment.js<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> math = <span class="built_in">require</span>(<span class="string">'./math'</span>);</span><br><span class="line">exports.increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> math.add(val, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>mian.js<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> $ = <span class="built_in">require</span>(<span class="string">'jquery'</span>);</span><br><span class="line"><span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'./increment'</span>).increment;</span><br><span class="line"></span><br><span class="line">$(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    $(<span class="string">':button'</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> val = <span class="built_in">parseInt</span>($(<span class="string">'#val'</span>).val());</span><br><span class="line">        <span class="keyword">var</span> res = inc(<span class="built_in">isNaN</span>(val) ? <span class="number">0</span> : val);</span><br><span class="line">        $(<span class="string">'#val'</span>).val(res);     </span><br><span class="line">    &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h3 id="browserify__u6253_u5305"><a href="#browserify__u6253_u5305" class="headerlink" title="browserify 打包"></a>browserify 打包</h3><p>在 www 目录下，使用 browserify 打包<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">browserify ./scripts/main.js -o bundle.js</span><br></pre></td></tr></table></figure></p>
+<h3 id="index-html"><a href="#index-html" class="headerlink" title="index.html"></a>index.html</h3><p>www目录下的index.html文件<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="doctype">&lt;!doctype html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">div</span>&gt;</span></span><br><span class="line">        Input Number: <span class="tag">&lt;<span class="title">input</span> <span class="attribute">type</span>=<span class="value">"text"</span> <span class="attribute">id</span>=<span class="value">"val"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">input</span> <span class="attribute">type</span>=<span class="value">"button"</span> <span class="attribute">value</span>=<span class="value">"Plus One"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="title">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">script</span> <span class="attribute">src</span>=<span class="value">"./bundle.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Webpack"><a href="#Webpack" class="headerlink" title="Webpack"></a>Webpack</h2><p>Webpack 是一种功能强大的模块加载器，与 Browserify 相比，可以灵活按配置将 js 打成多个包按需加载，提高首次访问页面的速读，同时也支持 css 、图片等静态文件的管理。 </p>
+<p>同样，以 webpack 实现 incrememnt 功能。</p>
+<p>前提：node 和 npm 环境准备就绪。</p>
+<h3 id="u5B89_u88C5_webpack"><a href="#u5B89_u88C5_webpack" class="headerlink" title="安装 webpack"></a>安装 webpack</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install webpack -g</span><br></pre></td></tr></table></figure>
+<p>示例中还演示了加载 css 的功能，需要在 www 目录安装 <code>css-loader</code> 和 <code>style-loader</code>，不带 <code>-g</code> 参数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install css-loader style-loader</span><br></pre></td></tr></table></figure></p>
+<h3 id="www/styles__u76EE_u5F55"><a href="#www/styles__u76EE_u5F55" class="headerlink" title="www/styles 目录"></a>www/styles 目录</h3><p>style.css<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">body</span> <span class="rules">&#123;</span><br><span class="line">    <span class="rule"><span class="attribute">background</span>:<span class="value"> <span class="hexcolor">#98887B</span></span></span>;</span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="www/scripts__u76EE_u5F55-1"><a href="#www/scripts__u76EE_u5F55-1" class="headerlink" title="www/scripts 目录"></a>www/scripts 目录</h3><p>math.js 和 increment.js 同 Browserify，lib子目录有 jquery-2.2.0.js 文件。<br>main.js 文件略微不同，还加载了 css 文件。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">require</span>(<span class="string">'../styles/style.css'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> $ = <span class="built_in">require</span>(<span class="string">'./lib/jquery-2.2.0'</span>);</span><br><span class="line"><span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'./increment'</span>).increment;</span><br><span class="line"></span><br><span class="line">$(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    $(<span class="string">':button'</span>).click(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> val = <span class="built_in">parseInt</span>($(<span class="string">'#val'</span>).val());</span><br><span class="line">        <span class="keyword">var</span> res = inc(<span class="built_in">isNaN</span>(val) ? <span class="number">0</span> : val);</span><br><span class="line">        $(<span class="string">'#val'</span>).val(res); </span><br><span class="line">    &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h3 id="www__u76EE_u5F55"><a href="#www__u76EE_u5F55" class="headerlink" title="www 目录"></a>www 目录</h3><p>www 目录增加 webpack 配置文件 webpack.config.js<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    entry: <span class="string">"./scripts/main.js"</span>,</span><br><span class="line">    output: &#123;</span><br><span class="line">        path: __dirname,</span><br><span class="line">        filename: <span class="string">"bundle.js"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="built_in">module</span>: &#123;</span><br><span class="line">        loaders: [</span><br><span class="line">            &#123; test: <span class="regexp">/\.css$/</span>, loader: <span class="string">"style!css"</span> &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h3 id="webpack__u6253_u5305"><a href="#webpack__u6253_u5305" class="headerlink" title="webpack 打包"></a>webpack 打包</h3><p>在 www 目录下，使用 webpack 打包，由于存在配置文件，直接运行命令 webpack 即可<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack</span><br></pre></td></tr></table></figure></p>
+<h3 id="index-html-1"><a href="#index-html-1" class="headerlink" title="index.html"></a>index.html</h3><p>www 目录下的 index.html 同 Browserify 中的例子，由于加载了 css 底色会有不同。</p>
+<h2 id="u6A21_u5757_u52A0_u8F7D_u5668_u6BD4_u8F83"><a href="#u6A21_u5757_u52A0_u8F7D_u5668_u6BD4_u8F83" class="headerlink" title="模块加载器比较"></a>模块加载器比较</h2><p>这个表格是 Webpack 官网上所列的 RequireJS、Browserify、Webpack 支持特性的比较： </p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>webpack/webpack</th>
+<th>jrburke/requirejs</th>
+<th>substack/node-browserify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CommonJs <code>require</code></td>
+<td><strong>yes</strong></td>
+<td>only wrapping in <code>define</code></td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>CommonJs <code>require.resolve</code></td>
+<td><strong>yes</strong></td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td>CommonJs <code>exports</code></td>
+<td><strong>yes</strong></td>
+<td>only wrapping in <code>define</code></td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>AMD <code>define</code></td>
+<td><strong>yes</strong></td>
+<td><strong>yes</strong></td>
+<td><a href="https://github.com/jaredhanson/deamdify" target="_blank" rel="external">deamdify</a></td>
+</tr>
+<tr>
+<td>AMD <code>require</code></td>
+<td><strong>yes</strong></td>
+<td><strong>yes</strong></td>
+<td>no</td>
+</tr>
+<tr>
+<td>AMD <code>require</code> loads on demand</td>
+<td><strong>yes</strong></td>
+<td>with manual configuration</td>
+<td>no</td>
+</tr>
+<tr>
+<td>ES2015 <code>import</code>/<code>export</code></td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Generate a single bundle</td>
+<td><strong>yes</strong></td>
+<td>yes♦</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Load each file separate</td>
+<td>no</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Multiple bundles</td>
+<td><strong>yes</strong></td>
+<td>with manual configuration</td>
+<td>with manual configuration</td>
+</tr>
+<tr>
+<td>Additional chunks are loaded on demand</td>
+<td><strong>yes</strong></td>
+<td><strong>yes</strong></td>
+<td>no</td>
+</tr>
+<tr>
+<td>Multi pages build with common bundle</td>
+<td>with manual configuration</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>Concat in require <code>require(&quot;./fi&quot; + &quot;le&quot;)</code></td>
+<td><strong>yes</strong></td>
+<td>no♦</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Indirect require <code>var r = require; r(&quot;./file&quot;)</code></td>
+<td><strong>yes</strong></td>
+<td>no♦</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Expressions in require (guided) <code>require(&quot;./templates/&quot; + template)</code></td>
+<td><strong>yes (all files matching included)</strong></td>
+<td>no♦</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Expressions in require (free) <code>require(moduleName)</code></td>
+<td>with manual configuration</td>
+<td>no♦</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Requirable files</td>
+<td>file system</td>
+<td><strong>web</strong></td>
+<td>file system</td>
+</tr>
+<tr>
+<td>Plugins</td>
+<td><strong>yes</strong></td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>Preprocessing</td>
+<td><strong>loaders, <a href="https://github.com/webpack/transform-loader" target="_blank" rel="external">transforms</a></strong></td>
+<td>loaders</td>
+<td>transforms</td>
+</tr>
+<tr>
+<td>Watch mode</td>
+<td>yes</td>
+<td>not required</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Debugging support</td>
+<td><strong>SourceUrl, SourceMaps</strong></td>
+<td>not required</td>
+<td>SourceMaps</td>
+</tr>
+<tr>
+<td>Node.js built-in libs <code>require(&quot;path&quot;)</code></td>
+<td><strong>yes</strong></td>
+<td>no</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>Other Node.js stuff</td>
+<td>process, __dir/filename, global</td>
+<td>-</td>
+<td>process, __dir/filename, global</td>
+</tr>
+<tr>
+<td>Replacement for browser</td>
+<td><code>web_modules</code>, <code>.web.js</code>, package.json field, alias config option</td>
+<td>alias option</td>
+<td>package.json field, alias option</td>
+</tr>
+<tr>
+<td>Minimizing</td>
+<td>uglify</td>
+<td>uglify, closure compiler</td>
+<td><a href="https://github.com/hughsk/uglifyify" target="_blank" rel="external">uglifyify</a></td>
+</tr>
+<tr>
+<td>Mangle path names</td>
+<td><strong>yes</strong></td>
+<td>no</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>Runtime overhead</td>
+<td><strong>243B + 20B per module + 4B per dependency</strong></td>
+<td>14.7kB + 0B per module + (3B + X) per dependency</td>
+<td>415B + 25B per module + (6B + 2X) per dependency</td>
+</tr>
+<tr>
+<td>Dependencies</td>
+<td>19MB / 127 packages</td>
+<td>11MB / 118 packages</td>
+<td><strong>1.2MB / 1 package</strong></td>
+</tr>
+</tbody>
+</table>
+<p>♦ in production mode (opposite in development mode)<br>X is the length of the path string</p>
+<p>HACKHAT 也有一个第三方的模块加载器的对比文章 <a href="http://hackhat.com/p/110/module-loader-webpack-vs-requirejs-vs-browserify/" target="_blank" rel="external">Module loader comparision: Webpack vs　Require.js vs Browserify</a> 可供参考。</p>
+<h2 id="u7ED3_u8BBA"><a href="#u7ED3_u8BBA" class="headerlink" title="结论"></a>结论</h2><p>「后端程序员的 JavaScript 之旅 - 模块化」系列文章介绍了：模块模式，解决在天生模块化缺失的情况下如何根据 JS 自身的语言特性构建模块化的基本方法；流行的模块化规范 CommonJS 、AMD 和 ES 6 模块标准等，了解到模块化规范对生态圈的重要性；介绍了生态圈中常用的三种常用的模块加载器及其特点。</p>
+<p>后端程序员的 JavaScript 之旅 - 模块化系列文章：<br><a href="http://lishaopeng.com/2016/02/05/js-module/">后端程序员的 JavaScript 之旅 - 模块化（一）</a> | <a href="http://www.jianshu.com/p/590003321975" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/11/js-module2/">后端程序员的 JavaScript 之旅 - 模块化（二）</a> | <a href="http://www.jianshu.com/p/86cca0c4447d" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/19/js-module3/">后端程序员的 JavaScript 之旅 - 模块化（三）</a> | <a href="http://www.jianshu.com/p/4ac788a67d11" target="_blank" rel="external">简书</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br>这篇文章是「模块化」系列的最后一篇，聊一聊前端模块加载器。上一篇文章<a href="http://lishaopeng.com/2016/02/11/js-module2/">《模块化（二）》</a>中提到的实现 AMD 规范的 RequireJS 就是一种比较常用的模块加载器，除此之外比较常用的有 Browserify 和 Webpack，接下来逐一介绍。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 模块化（二）]]></title>
+    <link href="http://lishaopeng.com/2016/02/11/js-module2/"/>
+    <id>http://lishaopeng.com/2016/02/11/js-module2/</id>
+    <published>2016-02-11T02:20:53.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br><a href="http://lishaopeng.com/2016/02/05/js-module/">上一篇</a>文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出来的比较有影响力的模块规范 CommonJS、AMD 以及 2015 年正式发布的 ECMAScript 6 Modules 部分。<br><a id="more"></a><br>下面的图表是来自 <a href="http://www.modulecounts.com/" target="_blank" rel="external">Module Counts</a> 的统计数据，可以看到 npm （CommonJS 规范） 的包数量增长曲线异常凶猛，其中一部分原因是 JavaScript 社区对模块规范需求释放的力量惊人，由此可见模块标准对生态圈的重要性。<br><img src="/./images/js-module2-counts.jpg" alt="module counts"></p>
+<h2 id="CommonJS"><a href="#CommonJS" class="headerlink" title="CommonJS"></a>CommonJS</h2><p>CommonJS 的前称是 ServerJS，由 Mozilla 工程师 Kevin Dangoor 在 2009 年 1 月发起，目标是为非浏览器（比如服务端、本地桌面应用、命令行应用）构建 JavaScript 生态系统，同年 8 月改名为 CommonJS，其目标也扩展到浏览器。CommonJS 的规范包括模块(Modules)、包(Package)、Promises 等多个方面，详情可查阅 <a href="http://wiki.commonjs.org/wiki/CommonJS" target="_blank" rel="external">CommonJS Wiki</a>。CommonJS 规范有很多的实现，清单可以看<a href="https://en.wikipedia.org/wiki/CommonJS" target="_blank" rel="external">这里</a>，其中最著名的实现就是 Node.js，接下来就以它作为例子介绍 CommonJS 的模块规范。<br>math.js 文件（也是模块）的功能是定义数学函数，目前仅实现 add 函数，通过 exports 变量作为其 add 属性导出。 exports 变量是由加载 math.js 时的底层环境提供的。<br>increament.js 文件（也是模块）的功能是定义 increment 函数，其依赖于 math.js 模块。 这个文件展示了如何定义模块之外还展示了如何导入模块，即通过 <code>require</code> 函数导入。 <code>require</code> 函数也是模块加载的底层环境提供的，具体的用法可以参考 <a href="https://nodejs.org/api/modules.html" target="_blank" rel="external">node.js 的官方文档</a>或<a href="http://lodejs.org/api/modules.html" target="_blank" rel="external">国内镜像站点</a>。<br>main.js 展示如何导入模块以及如何使用导出函数。<br><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">exports.add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> add = <span class="built_in">require</span>(<span class="string">'math'</span>).add;</span><br><span class="line">exports.increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'increment'</span>).increment;</span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">inc(a); <span class="comment">// =&gt; 2</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.id == <span class="string">"main"</span>;</span><br></pre></td></tr></table></figure></p>
+<h2 id="AMD"><a href="#AMD" class="headerlink" title="AMD"></a>AMD</h2><p>AMD 是”Asynchronous Module Definition”的缩写，意思是「异步模块定义」，它跟 CommonJS 有一些渊源。AMD 的出现是由于 CommonJS 的模块规范对浏览器支持不友好，当然解决方式有多种多样，社区也有许多争论，具体可以参考玉伯（CMD/sea.js 作者）的文章<a href="https://github.com/seajs/seajs/issues/588" target="_blank" rel="external">《前端模块化开发那点历史》</a>。总之最终 AMD 规范没有得到 CommonJS 社区的认同决定自立门户，并且追随者众多，实现其规范的佼佼者有 Dojo Toolkit、RequireJS 等。<br>与 CommonJS 相比，AMD 解决了浏览器环境异步加载 js 文件避免网页失去响应以及模块之间依赖的问题。<br>现在用 RequireJS 实现上一节中的示例。<br>RequireJS 通过 define 函数定义模块，该函数的第一个参数指定当前所定义的模块 ID，第二个参数指定依赖的模块列表，第三个参数定义模块的实现函数，另外前两个参数是可选的。<br><strong>AMD 定义函数说明</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">define(</span><br><span class="line">    module_id <span class="comment">/*optional*/</span>, </span><br><span class="line">    [dependencies] <span class="comment">/*optional*/</span>, </span><br><span class="line">    definition <span class="comment">/*function for instantiating the module or object*/</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p><strong>目录结构</strong></p>
+<ol>
+<li>index.html 文件中，导入 require.js 的 javascript 标签中包含 <code>data-main=&quot;app&quot;</code> 属性，表示加载的主数据文件为 app.js 。</li>
+<li>app.js 中通过 <code>requirejs.config</code> 配置目录结构，并且加载 main.js 文件。</li>
+<li>main.js 通过 define 作为入口导入带 require 参数的匿名函数，匿名函数体内实现具体功能，通过 require 函数导入其他模块。</li>
+<li>increment.js 和 math.js 按规规范，通过 define 函数实现模块。</li>
+</ol>
+<p><img src="/./images/js-module2-dir.png" alt="目录结构"></p>
+<p><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="string">'math'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x + y;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        add: add</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="string">'increment'</span>, [<span class="string">'math'</span>], <span class="function"><span class="keyword">function</span>(<span class="params">math</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> add = math.add;</span><br><span class="line">    <span class="keyword">var</span> increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        increment: increment</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="function"><span class="keyword">function</span> (<span class="params">require</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'increment'</span>).increment;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'inc =&gt; '</span> + inc);</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(inc(a, <span class="number">1</span>)); <span class="comment">// =&gt; 2</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>app.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">requirejs.config(&#123;</span><br><span class="line">    baseUrl: <span class="string">'lib'</span>,</span><br><span class="line">    paths: &#123;</span><br><span class="line">        app: <span class="string">'../app'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">requirejs([<span class="string">'app/main'</span>]);</span><br></pre></td></tr></table></figure></p>
+<p><strong>index.html</strong><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="doctype">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">script</span> <span class="attribute">data-main</span>=<span class="value">"app"</span> <span class="attribute">src</span>=<span class="value">"lib/require.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="title">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="UMD/CMD"><a href="#UMD/CMD" class="headerlink" title="UMD/CMD"></a>UMD/CMD</h2><p>UMD 是 “Universal Module Definition” 的缩写，提供了一系列模式同时兼容 CommonJS 和 AMD ，代价是代码有些丑陋。<br>CMD 是 “Common Module Definition” 的缩写，是国内的前端大牛玉伯提出的，实现是 sea.js ，在国内比较知名。不过目前作者已经宣布放弃 sea.js，可以参考 github 上的讨论：<a href="https://github.com/seajs/seajs/issues/1605" target="_blank" rel="external">《感觉一直追赶的SeaJS已死》</a>。</p>
+<h2 id="ECMAScript_6_Modules"><a href="#ECMAScript_6_Modules" class="headerlink" title="ECMAScript 6 Modules"></a>ECMAScript 6 Modules</h2><p>令人振奋的消息是 2015 年 6 月正式发布的 ECMAScript 6 包含了模块规范，采用申明式的语法，使用 import、export 这两个关键字，同时照顾到 Common.JS 社区和 AMD 社区的使用习惯，方便地实现模块的定义和导入。<br>我们再用 ES6 的语法实现一遍上面两节的示例。<br><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> math <span class="keyword">from</span> <span class="string">'math'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> add = math.add;</span><br><span class="line">exports <span class="function"><span class="keyword">function</span> <span class="title">increment</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; increment &#125; <span class="keyword">from</span> <span class="string">'increment'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">increment(a); <span class="comment">// =&gt; 2</span></span><br></pre></td></tr></table></figure></p>
+<p>ES6 正式发布到目前为止还不到半年时间，推广还需要很长一段时间。目前主流的浏览器比如 Chorme、Firefox 还仅支持部分 ES6 的特性，具体可以参考 <a href="https://kangax.github.io/compat-table/es6/" target="_blank" rel="external">ECMAScript 6 compatibility table</a>，所以目前正在进行的项目押宝在 ES 6 Modules 具有一定风险。<br>目前想使用最新的 ES6 新特性可以：</p>
+<ul>
+<li><a href="https://github.com/google/traceur-compiler" target="_blank" rel="external">traceur</a> 将ES6模块编译为AMD规范或者CommonJS规范的模块</li>
+<li><a href="https://github.com/esnext/es6-module-transpiler" target="_blank" rel="external">es6 module transpiler</a> 是Google的转换编译器，目的在于支持许多Javascript的特性包括ES6模块</li>
+<li><a href="http://www.typescriptlang.org/" target="_blank" rel="external">TypeScript</a> 微软出品的 JavaScript 超集语言，也支持 ES6 模块</li>
+</ul>
+<p>参考：<br><a href="https://github.com/seajs/seajs/issues/588" target="_blank" rel="external">前端模块化开发那点历史</a><br><a href="http://huangxuan.me/2015/07/09/js-module-7day/" target="_blank" rel="external">JavaScript 模块化七日谈</a><br><a href="https://book.douban.com/subject/25768396/" target="_blank" rel="external">深入浅出Node.js</a><br><a href="http://requirejs.org/" target="_blank" rel="external">RequireJS.org</a><br><a href="https://addyosmani.com/writing-modular-js/" target="_blank" rel="external">Writing Modular JavaScript With AMD, CommonJS &amp; ES Harmony</a><br><a href="http://www.infoq.com/news/2013/08/es6-modules" target="_blank" rel="external">ECMAScript 6 Modules: What Are They and How to Use Them Today</a><br><a href="http://www.2ality.com/2014/09/es6-modules-final.html" target="_blank" rel="external">ECMAScript 6 modules: the final syntax</a></p>
+<p>后端程序员的 JavaScript 之旅 - 模块化系列文章：<br><a href="http://lishaopeng.com/2016/02/05/js-module/">后端程序员的 JavaScript 之旅 - 模块化（一）</a> | <a href="http://www.jianshu.com/p/590003321975" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/11/js-module2/">后端程序员的 JavaScript 之旅 - 模块化（二）</a> | <a href="http://www.jianshu.com/p/86cca0c4447d" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/19/js-module3/">后端程序员的 JavaScript 之旅 - 模块化（三）</a> | <a href="http://www.jianshu.com/p/4ac788a67d11" target="_blank" rel="external">简书</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br><a href="http://lishaopeng.com/2016/02/05/js-module/">上一篇</a>文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出来的比较有影响力的模块规范 CommonJS、AMD 以及 2015 年正式发布的 ECMAScript 6 Modules 部分。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 模块化（一）]]></title>
+    <link href="http://lishaopeng.com/2016/02/05/js-module/"/>
+    <id>http://lishaopeng.com/2016/02/05/js-module/</id>
+    <published>2016-02-05T06:21:23.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br>ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《后端程序员的 JavaScript 之旅 - 模块化》系列将分多个篇幅分别介绍 JavaScript 模块化实现的基本原理、模块化规范、业内比较流行的加载器以及 ES 6 的模块特性。阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/10/javascript_module.html" target="_blank" rel="external">《Javascript 模块化编程》</a>系列对模块化的内容有精彩的描述，这个系列写在 2012 年，JavaScript 生态圈在近几年发生了日新月异的变化，我会尝试增加一些新的内容。<br>本文全面介绍 <a href="http://www.adequatelygood.com/" target="_blank" rel="external">Ben Cherry</a> 在 <a href="http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html" target="_blank" rel="external">JavaScript Module Pattern: In-Depth</a> 一文中提到的 JavaScript 模块化设计模式。<br><a id="more"></a></p>
+<h2 id="u57FA_u7840_u6A21_u5F0F"><a href="#u57FA_u7840_u6A21_u5F0F" class="headerlink" title="基础模式"></a>基础模式</h2><h3 id="u533F_u540D_u95ED_u5305"><a href="#u533F_u540D_u95ED_u5305" class="headerlink" title="匿名闭包"></a>匿名闭包</h3><p>匿名闭包是很常用的代码隔离方式，声明匿名对象并立即执行。匿名函数中声明的变量和方法以及匿名函数本身不会污染到函数体外，同时匿名函数的调用形成一个闭包，使函数体内可以使用函数体外声明的变量和方法。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="comment">// ... all vars and functions are in this scope only</span></span><br><span class="line">	<span class="comment">// still maintains access to all globals</span></span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<h3 id="u5168_u5C40_u5BFC_u5165"><a href="#u5168_u5C40_u5BFC_u5165" class="headerlink" title="全局导入"></a>全局导入</h3><p>我们知道 JavaScript 全局变量的作用域贯穿全局，在函数内也可以使用甚至声明全局变量，这样很容易导致代码混乱难以管理。<br>全局导入模式是匿名闭包的一个变种，增加参数导入全局变量，约定在匿名函数内部只能通过导入的参数访问外部的模块，从而使模块间的依赖清晰，便于管理。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">$, YAHOO</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// now have access to globals jQuery (as $) and YAHOO in this code</span></span><br><span class="line">&#125;(jQuery, YAHOO));</span><br></pre></td></tr></table></figure></p>
+<p>这种约定不能强制阻止函数体内部访问全局变量，其中一个解决方案是把所有的模块都使用这种方式处理，仅把模块本身导出到全局变量，这样就可以极大减少全局变量的使用。</p>
+<h3 id="u6A21_u5757_u5BFC_u51FA"><a href="#u6A21_u5757_u5BFC_u51FA" class="headerlink" title="模块导出"></a>模块导出</h3><p>模块导出就是将立即执匿名函数的结果返回赋值给一个全局变量。匿名函数仅将开放的对象返回，其内部定义的变量、函数仍然对外部不可见。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;,</span><br><span class="line">		privateVariable = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">privateMethod</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	my.moduleProperty = <span class="number">1</span>;</span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// ...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<h2 id="u8FDB_u9636_u6A21_u5F0F"><a href="#u8FDB_u9636_u6A21_u5F0F" class="headerlink" title="进阶模式"></a>进阶模式</h2><h3 id="u6269_u5145_u6A21_u5F0F"><a href="#u6269_u5145_u6A21_u5F0F" class="headerlink" title="扩充模式"></a>扩充模式</h3><p>JavaScript 对象支持热扩充，结合全局导入模式，我们可以将模块进行扩充。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	my.anotherMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// added method...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure></p>
+<p>这种模式假定 MODULE 已经声明过，如果没有声明调用会出错。</p>
+<h3 id="u5BBD_u6269_u5145_u6A21_u5F0F"><a href="#u5BBD_u6269_u5145_u6A21_u5F0F" class="headerlink" title="宽扩充模式"></a>宽扩充模式</h3><p>宽扩充模式通过一个技巧，调用匿名函数传递 <code>MODULE || {}</code> 作为参数，解决 MODULE 如果未事先申明调用出错的问题。这个模式还隐藏着一个妙处，就是多个扩充模式可以并行地被调用不被堵塞。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// add capabilities...</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE || &#123;&#125;));</span><br></pre></td></tr></table></figure></p>
+<h3 id="u7D27_u6269_u5145_u6A21_u5F0F"><a href="#u7D27_u6269_u5145_u6A21_u5F0F" class="headerlink" title="紧扩充模式"></a>紧扩充模式</h3><p>宽扩充模式非常棒，但是有一个缺点是对无法安全地处理方法属性的重载。紧扩充模式保持对旧有方法的的引用，在定义的新方法中可以灵活地重用旧有方法的功能。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> old_moduleMethod = my.moduleMethod;</span><br><span class="line"></span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// method override, has access to old through old_moduleMethod...</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure></p>
+<h3 id="u514B_u9686_u548C_u7EE7_u627F"><a href="#u514B_u9686_u548C_u7EE7_u627F" class="headerlink" title="克隆和继承"></a>克隆和继承</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE_TWO = (<span class="function"><span class="keyword">function</span> (<span class="params">old</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;,</span><br><span class="line">		key;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (key <span class="keyword">in</span> old) &#123;</span><br><span class="line">		<span class="keyword">if</span> (old.hasOwnProperty(key)) &#123;</span><br><span class="line">			my[key] = old[key];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">var</span> super_moduleMethod = old.moduleMethod;</span><br><span class="line">	my.moduleMethod = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="comment">// override method on the clone, access to super through super_moduleMethod</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE));</span><br></pre></td></tr></table></figure>
+<p>克隆和继承模式差不多是对原有模块影响最小的模块重用方式，这种模式通浅克隆旧模块属性的方式进行重用，可以结合紧扩充模式处理方法重载的问题。需要注意的是，这是一种浅克隆，当旧模块的属性是对象的时候，针对这个对象的修改，将会对新旧两个模块相互影响。</p>
+<h3 id="u8DE8_u6587_u4EF6_u79C1_u6709_u72B6_u6001"><a href="#u8DE8_u6587_u4EF6_u79C1_u6709_u72B6_u6001" class="headerlink" title="跨文件私有状态"></a>跨文件私有状态</h3><p>当一个模块分拆成多个文件，使用宽扩充模式会发现一个限制，各文件中的方法会维护自己的私有状态而无法在模块的多个文件中共享，下面的一个示例展示如何在这种情况下对私有状态再同一个模块见共享。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MODULE = (<span class="function"><span class="keyword">function</span> (<span class="params">my</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> _private = my._private = my._private || &#123;&#125;,</span><br><span class="line">		_seal = my._seal = my._seal || <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">			<span class="keyword">delete</span> my._private;</span><br><span class="line">			<span class="keyword">delete</span> my._seal;</span><br><span class="line">			<span class="keyword">delete</span> my._unseal;</span><br><span class="line">		&#125;,</span><br><span class="line">		_unseal = my._unseal = my._unseal || <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">			my._private = _private;</span><br><span class="line">			my._seal = _seal;</span><br><span class="line">			my._unseal = _unseal;</span><br><span class="line">		&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// permanent access to _private, _seal, and _unseal</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;(MODULE || &#123;&#125;));</span><br></pre></td></tr></table></figure>
+<p>每个文件维护一个本地变量 <code>_private</code>，用于分享给别的模块。当模块被加载之后，调用 <code>MODULE._seal</code> 销毁本地变量 <code>_private</code> 的外部访问属性。如果模块需要扩充，加载文件之前调用 <code>_unseal</code> 将本地变量 <code>_private</code> 输出到外部访问的属性，加载之后，调用  <code>_seal</code> 销毁外部访问的属性。 </p>
+<h3 id="u5B50_u6A21_u5757"><a href="#u5B50_u6A21_u5757" class="headerlink" title="子模块"></a>子模块</h3><p>子模块就是将模块的属性也定义为模块，可以灵活使用上面提到的各种模式。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MODULE.sub = (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> my = &#123;&#125;;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> my;</span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
+<p>后端程序员的 JavaScript 之旅 - 模块化系列文章：<br><a href="http://lishaopeng.com/2016/02/05/js-module/">后端程序员的 JavaScript 之旅 - 模块化（一）</a> | <a href="http://www.jianshu.com/p/590003321975" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/11/js-module2/">后端程序员的 JavaScript 之旅 - 模块化（二）</a> | <a href="http://www.jianshu.com/p/86cca0c4447d" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/19/js-module3/">后端程序员的 JavaScript 之旅 - 模块化（三）</a> | <a href="http://www.jianshu.com/p/4ac788a67d11" target="_blank" rel="external">简书</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-module-title.jpg" alt="模块化"><br>ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《后端程序员的 JavaScript 之旅 - 模块化》系列将分多个篇幅分别介绍 JavaScript 模块化实现的基本原理、模块化规范、业内比较流行的加载器以及 ES 6 的模块特性。阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/10/javascript_module.html">《Javascript 模块化编程》</a>系列对模块化的内容有精彩的描述，这个系列写在 2012 年，JavaScript 生态圈在近几年发生了日新月异的变化，我会尝试增加一些新的内容。<br>本文全面介绍 <a href="http://www.adequatelygood.com/">Ben Cherry</a> 在 <a href="http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html">JavaScript Module Pattern: In-Depth</a> 一文中提到的 JavaScript 模块化设计模式。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[ECMA-262 in detail]]></title>
+    <link href="http://lishaopeng.com/2016/01/29/js-ecma-262/"/>
+    <id>http://lishaopeng.com/2016/01/29/js-ecma-262/</id>
+    <published>2016-01-29T13:56:08.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-ecma-262-title.jpg" alt="ECMA-262 in detail"><br>发现一个俄罗斯软件工程师 <a href="http://dmitrysoshnikov.com/about/" target="_blank" rel="external">Dmitry Soshnikov</a> 写的《深入 ECMA-262-3》、《深入 ECMA-262-5》系列文章，被翻译成多国语言，其中部分文章已经被热情的粉丝翻译成中文了，马之。</p>
+<h3 id="ECMA-262-3_in_detail"><a href="#ECMA-262-3_in_detail" class="headerlink" title="ECMA-262-3 in detail"></a>ECMA-262-3 in detail</h3><p><a href="http://dmitrysoshnikov.com/ecmascript/javascript-the-core/" target="_blank" rel="external">JavaScript. The core</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-1-execution-contexts/" target="_blank" rel="external">Chapter 1. Execution Contexts</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-2-variable-object/" target="_blank" rel="external">Chapter 2. Variable object</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-3-this/" target="_blank" rel="external">Chapter 3. This</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-4-scope-chain/" target="_blank" rel="external">Chapter 4. Scope chain</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/" target="_blank" rel="external">Chapter 5. Functions</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-6-closures/" target="_blank" rel="external">Chapter 6. Closures</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-7-1-oop-general-theory/" target="_blank" rel="external">Chapter 7.1. OOP: The general theory</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-7-2-oop-ecmascript-implementation/" target="_blank" rel="external">Chapter 7.2. OOP: ECMAScript implementation</a><br><a href="http://dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/" target="_blank" rel="external">Chapter 8. Evaluation strategy</a></p>
+<h3 id="ECMA-262-5_in_detail"><a href="#ECMA-262-5_in_detail" class="headerlink" title="ECMA-262-5 in detail"></a>ECMA-262-5 in detail</h3><p><a href="http://dmitrysoshnikov.com/ecmascript/es5-chapter-0-introduction/" target="_blank" rel="external">Chapter 0. Introduction</a><br><a href="http://dmitrysoshnikov.com/ecmascript/es5-chapter-1-properties-and-property-descriptors/" target="_blank" rel="external">Chapter 1. Properties and Property Descriptors</a><br><a href="http://dmitrysoshnikov.com/ecmascript/es5-chapter-2-strict-mode/" target="_blank" rel="external">Chapter 2. Strict Mode</a><br><a href="http://dmitrysoshnikov.com/ecmascript/es5-chapter-3-1-lexical-environments-common-theory/" target="_blank" rel="external">Chapter 3.1. Lexical environments: Common Theory</a><br><a href="http://dmitrysoshnikov.com/ecmascript/es5-chapter-3-2-lexical-environments-ecmascript-implementation/" target="_blank" rel="external">Chapter 3.2. Lexical environments: ECMAScript implementation</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/01/29/js-ecma-262/">ECMA-262 in detail</a><br>简书：<a href="http://www.jianshu.com/p/a0b8a65b6789" target="_blank" rel="external">ECMA-262 in detail</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-ecma-262-title.jpg" alt="ECMA-262 in detail"><br>发现一个俄罗斯软件工程师 <a href="http://dmitrysoshnikov.com/about/" target="]]>
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包]]></title>
+    <link href="http://lishaopeng.com/2016/01/27/js-closure/"/>
+    <id>http://lishaopeng.com/2016/01/27/js-closure/</id>
+    <published>2016-01-27T10:11:57.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-closure-title.jpg" alt="作用域链、执行上下文与闭包"><br>JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法上的表达式一致的，f 被调用之后返回的是<code>local scope</code>。函数对象 f 在其主体函数 foo 调用结束之后，依然保持着 foo 函数体作用域变量的引用，这就是所谓的闭包 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scope;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> f = foo();</span><br><span class="line">f(); <span class="comment">// 返回 "local scope"</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>那么闭包到底是如何工作的呢？了解闭包首先需要了解变量作用域和作用域链，另外一个重要的概念是执行上下文环境。</p>
+<h2 id="u53D8_u91CF_u4F5C_u7528_u57DF"><a href="#u53D8_u91CF_u4F5C_u7528_u57DF" class="headerlink" title="变量作用域"></a>变量作用域</h2><p>JavaScript 中全局变量拥有全局的作用域，函数体内申明的变量的作用域是整个函数体内，是局部的，当然也包括函数体内定义的嵌套函数。函数体内局部变量的优先级高于全局变量，如果局部变量与全局变量重名，全局变量会被局部变量掩盖；同样嵌套函数内定义的局部变量的优先级高于嵌套函数所在函数的局部变量。这简直是显而易见的，几乎所有人都了解。<br>接下来谈谈可能大家比较陌生的。</p>
+<h3 id="u51FD_u6570_u58F0_u660E_u63D0_u5347"><a href="#u51FD_u6570_u58F0_u660E_u63D0_u5347" class="headerlink" title="函数声明提升"></a>函数声明提升</h3><p>用一句话来说明函数申明提升，指的是函数体内部申明的变量再整个函数内有效。也就是说，就是在函数体最底部申明的变量，也会被提升到最顶部。举个例子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(scope); <span class="comment">// 这里不会打印出 "global scope"，而是 "undefined"</span></span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>; </span><br><span class="line">    <span class="built_in">console</span>.log(scope); <span class="comment">// 很显然，打印出 "local scope"</span></span><br><span class="line">&#125;</span><br><span class="line">foo();</span><br></pre></td></tr></table></figure></p>
+<p>第一个<code>console.log(scope)</code>会打印出<code>undefined</code>而不是<code>global scope</code>，是因为局部变量的申明被提升了，只是还未赋值。</p>
+<h3 id="u4F5C_u4E3A_u5C5E_u6027_u7684_u53D8_u91CF"><a href="#u4F5C_u4E3A_u5C5E_u6027_u7684_u53D8_u91CF" class="headerlink" title="作为属性的变量"></a>作为属性的变量</h3><p>在 JavaScript 中，有三种定义全局变量的方式，如下示例代码中的 globalVal1 、globalVal2 和 globalValue3 。一个有趣的现象是，实际上全局变量仅仅只是全局对象 window/global （在浏览器中是 window，在 node.js 中是 global）的属性而已。为了更加符合通常意义的变量定义， JavaScript 把用 var 定义的全局变量，设计成了不可删除的全局对象属性。 通过<code>Object.getOwnPropertyDescriptor(this, &#39;globalVal1&#39;)</code>可以得到，其 configurable 属性为 false 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> globalVal1 = <span class="number">1</span>; <span class="comment">// 不可删除的全局变量</span></span><br><span class="line">globalVal2 = <span class="number">2</span>; <span class="comment">// 可删除的全局变量</span></span><br><span class="line"><span class="keyword">this</span>.globalValue3 = <span class="number">3</span>; <span class="comment">// 同 globalValue2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">delete</span> globalVal1; <span class="comment">// =&gt; false 变量没有被删除</span></span><br><span class="line"><span class="keyword">delete</span> globalVal2; <span class="comment">// =&gt; true 变量被删除</span></span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">this</span>.globalValue3; <span class="comment">//=&gt; true 变量被删除</span></span><br></pre></td></tr></table></figure></p>
+<p>那么问题来了，函数体内定义的局部变量是不是也作为某个对象的属性呢？答案是肯定的。这个对象是跟函数调用相关的，在 ECMAScript 3中称为“call object”、ECMAScript 5中称为“declaravite environment record”的对象。这个特殊的对象对我们来说是一种不可见的内部实现。</p>
+<h3 id="u4F5C_u7528_u57DF_u94FE"><a href="#u4F5C_u7528_u57DF_u94FE" class="headerlink" title="作用域链"></a>作用域链</h3><p>从上一节我们知道，函数局部变量可与看做是某个不可见的对象的属性。那么 JavaScript 的词法作用域的实现可以这样描述：每一段 JavaScript 代码（全局或函数）都有一个跟它关联的作用域链，它可以是数组或链表结构；作用域链中的每一个元素定义了一组作用域内的变量；当我们要查找变量 x 的值，那么从作用域链的第一个元素中找这个变量，如果没有找到者找链表中的下一个元素中查找，直到找到或抵达链尾。了解作用域链的概念对理解闭包至关重要。</p>
+<h2 id="u6267_u884C_u4E0A_u4E0B_u6587"><a href="#u6267_u884C_u4E0A_u4E0B_u6587" class="headerlink" title="执行上下文"></a>执行上下文</h2><p>每段 JavaScript 代码的执行都与执行上下文绑定，运行的代码通过执行上下文获可用的变量、函数、数据等信息。全局的执行上下文是唯一的，与全局代码绑定，每执行一个函数都会创建一个执行上下文与其绑定。JavaScript 通过栈的数据结构维护执行上下文，全局执行上下文位于栈底，当执行一个函数的时候，新创建的函数执行上下文将会压入栈中，执行上下文指针指向栈顶，运行的代码即可获得当前执行的函数绑定的执行上下文。如果函数体执行嵌套的函数，也会创建执行上下文并压入栈，指针指向栈顶，当嵌套函数运行结束后，与它绑定的执行上下文被推出栈，指针重新指向函数绑定的执行上下文。同样，函数执行结束，指针会指向全局执行上下文。<br>执行上下文可以描述成式一个包含变量对象（对应全局）/活动对象（对应函数）、作用域链和 this 的数据结构。当一个函数执行时，活动对象被创建并绑定到执行上下文。活动对象包括函数体内申明的变量、函数、arguments 等。作用域链在上一节以及提到，是按词法作用域构建的。需要注意的是 this 不属于活动对象，在函数执行的那一刻就以及确定。<br>执行上下文的创建是有特定的次序和阶段的，不同阶段有不同的状态，具体的细节可以看一下参考资料，在结尾部分会列出。</p>
+<h2 id="u95ED_u5305"><a href="#u95ED_u5305" class="headerlink" title="闭包"></a>闭包</h2><p>了解了作用域链和执行上下文，回过头看篇首的那段代码，基本上就可以解释闭包式如何工作了。函数调用的时候创建的执行上下文以及词法作用域链保持函数调用所需要的信息， f 函数调用之后才可以返回<code>local scope</code>。<br>需要注意的是，函数内定义的多个函数使用的是同一个作用域链，在使用 for 循环赋值匿名函数对象的场景比较容易引起错误，举例如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    arr[i] = &#123;</span><br><span class="line">        func: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">arr[<span class="number">0</span>].func(); <span class="comment">// 返回 10，而不是 0</span></span><br></pre></td></tr></table></figure></p>
+<p><code>arr[0].func()</code>返回的是 10 而不是 0，跟感官上的语义有偏差。在 ECMAScript 6 引入 let 之前， 变量作用域范围是在整个函数体内而不是在代码区块之内，所以上面的例子中所有定义的 func 函数引用了同一个作用域链在 for 循环之后， i 的值已经变为 10 。<br>正确的做法是这样：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> arr = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">    arr[i] = &#123;</span><br><span class="line">        func: getFunc(i)</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFunc</span>(<span class="params">i</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">arr[<span class="number">0</span>].func(); <span class="comment">// 返回 0</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>参考</strong><br><a href="http://book.douban.com/subject/5303032/" target="_blank" rel="external">JavaScript: The Definitive Guide</a><br><a href="http://davidshariff.com/blog/what-is-the-execution-context-in-javascript/" target="_blank" rel="external">What is the Execution Context &amp; Stack in JavaScript?</a><br><a href="http://ryanmorr.com/understanding-scope-and-context-in-javascript/" target="_blank" rel="external">Understanding Scope and Context in JavaScript</a><br><a href="http://lishaopeng.com/2016/01/29/js-ecma-262/">ECMA-262 in detail</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/01/27/js-closure/">后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包</a><br>简书：<a href="http://www.jianshu.com/p/44451236a646" target="_blank" rel="external">后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-closure-title.jpg" alt="作用域链、执行上下文与闭包"><br>JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法上的表达式一致的，f 被调用之后返回的是<code>local scope</code>。函数对象 f 在其主体函数 foo 调用结束之后，依然保持着 foo 函数体作用域变量的引用，这就是所谓的闭包 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scope;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> f = foo();</span><br><span class="line">f(); <span class="comment">// 返回 "local scope"</span></span><br></pre></td></tr></table></figure></p>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - JavaScript 对象系统]]></title>
+    <link href="http://lishaopeng.com/2016/01/24/js-object-system/"/>
+    <id>http://lishaopeng.com/2016/01/24/js-object-system/</id>
+    <published>2016-01-24T01:49:51.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-objsys-title.jpg" alt="JavaScript 对象系统"><br>JavaScript 的基本类型是数值类型、字符串类型、布尔类型、null 和 undefined，除此之外所有其他类型都是对象：数组是对象、函数是对象、正则表达式是对象，当然对象也是对象（在<a href="http://lishaopeng.com/2016/01/16/js-good_bad/">后端程序员的 JavaScript 之旅 - 好的设计与坏的设计</a> 一文中，我们了解到甚至 null 也是对象）。对象系统是 JavaScript 的根基，基于原型的面向对象设计巧妙地隐藏了内部的原型链的实现，让使用者容易上手，然而想对其做进一步的了解会产生许多疑惑。<br><a id="more"></a></p>
+<p>我们知道，一个普通对象（非函数对象）是通过原型链实现面向对象的，那么函数对象作为一个对象，它的原型链指向什么？ Function 函数对象和 Object 函数对象之间又有什么联系？ 好在我找到 <a href="http://www.mollypages.org/tutorials/js.mp" target="_blank" rel="external">JavaScript Object Layout</a> 一文对 JavaScript 的对象系统画了一张很直观的图，可以帮助我们理解。<br><img src="/./images/js-objsys-layout.jpg" alt="JavaScript Object Layout"></p>
+<p><strong>要点</strong></p>
+<ol>
+<li>对象通过<code>__proto__</code>属性指向其构造函数（函数对象）的<code>prototype</code>属性实现继承。 </li>
+<li>构造函数的<code>prototype</code>属性实际上是包含<code>constructor</code>属性的对象，该<code>constructor</code>属性指向构造函数。</li>
+<li>构造函数（函数对象）本身并不使用<code>prototype</code>属性做原型链，供其创建出来的对象使用。</li>
+<li>构造函数默认的<code>prototype</code>属性可以被改写，这时候其创建的对象继承这个被改写后的属性。</li>
+<li>Function 对象比较特殊，Function 的<code>__proto__</code>指向<code>Function.prototype</code>，换句话说是 Function 自己构造了自己。</li>
+<li><code>Object instanceof Object === true</code>，但是<code>Foo instanceof Foo === false</code></li>
+</ol>
+<p>原文：<a href="http://lishaopeng.com/2016/01/24/js-object-system/">后端程序员的 JavaScript 之旅 - JavaScript 对象系统</a><br>简书：<a href="http://www.jianshu.com/p/8822778cbeab" target="_blank" rel="external">后端程序员的 JavaScript 之旅 - JavaScript 对象系统</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-objsys-title.jpg" alt="JavaScript 对象系统"><br>JavaScript 的基本类型是数值类型、字符串类型、布尔类型、null 和 undefined，除此之外所有其他类型都是对象：数组是对象、函数是对象、正则表达式是对象，当然对象也是对象（在<a href="http://lishaopeng.com/2016/01/16/js-good_bad/">后端程序员的 JavaScript 之旅 - 好的设计与坏的设计</a> 一文中，我们了解到甚至 null 也是对象）。对象系统是 JavaScript 的根基，基于原型的面向对象设计巧妙地隐藏了内部的原型链的实现，让使用者容易上手，然而想对其做进一步的了解会产生许多疑惑。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 好的设计与坏的设计]]></title>
+    <link href="http://lishaopeng.com/2016/01/16/js-good_bad/"/>
+    <id>http://lishaopeng.com/2016/01/16/js-good_bad/</id>
+    <published>2016-01-16T04:48:22.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-good_bad-title.jpg" alt="好的设计与坏的设计"><br>JavaScript 可能是迄今为止最被误解的语言，它包含的许多美妙设计被其同样包含的糟糕设计所淹没，总体上给人的印象是一种没有做好充分设计的、稍显混乱的玩具语言。现在我们再重新梳理一下语言的基本特性，仔细分辨哪些是好的、哪些是坏的。</p>
+<p>维基百科是这样描述 JavaScript 的：</p>
+<blockquote>
+<p>JavaScript is a high-level, dynamic, untyped, and interpreted programming language. It has been standardized in the ECMAScript language specification. Alongside HTML and CSS, it is one of the three essential technologies of World Wide Web content production; the majority of websites employ it and it is supported by all modern web browsers without plug-ins. JavaScript is prototype-based with first-class functions, making it a multi-paradigm language, supporting object-oriented, imperative, and functional programming styles. It has an API for working with text, arrays, dates and regular expressions, but does not include any I/O, such as networking, storage or graphics facilities, relying for these upon the host environment in which it is embedded.</p>
+</blockquote>
+<p>可以清楚地看到， JavaScript 是高级的、动态的、弱类型的、解释型的语言。同时又指出它是基于原型的、以函数作为一等公民的，同时支持面向对象的、命令式的、具有函数式编程风格的多范式语言。是不是比第一印象中的强大很多？事实上，在支持多编程范式这一点上，跟 Java 、 C# 等语言相比是赢在起跑线上的。<br><a id="more"></a></p>
+<h2 id="u597D_u7684_u8BBE_u8BA1"><a href="#u597D_u7684_u8BBE_u8BA1" class="headerlink" title="好的设计"></a>好的设计</h2><h3 id="u662F_u5BF9_u8C61_u8FD8_u662F_u51FD_u6570_uFF1F"><a href="#u662F_u5BF9_u8C61_u8FD8_u662F_u51FD_u6570_uFF1F" class="headerlink" title="是对象还是函数？"></a>是对象还是函数？</h3><p>Object 是类，是对象，还是函数？以一个 Java 、 C# 的程序员的视角， Object 更象一个类，在 JavaScript 中我们可以使用 new 操作符将 Object 创建出一个对象。但是很显然 Object 不是类， JavaScript 中并不存在类的概念， new 之所以能创建出对象，是因为把 Object 当做构造函数，用于对象的初始化。通过 <code>typeof Object</code> 操作可以知道 Object 是一个函数。再通过另外一个更科学的技巧，使用 <code>Object.prototype.toString.apply(Object)</code> 可以得到 <code>&quot;[object Function]&quot;</code>。下列的第一个表格列出了一些典型的考察目标，可以得出结论： Object 首先是个对象，其次它也是一个函数，或者我们可以称之为函数对象。</p>
+<p>函数对象可以：</p>
+<ul>
+<li>被直接调用</li>
+<li>绑定到某个对象调用</li>
+<li>如果仅仅只有初始化对象的功能可以施加 new 构造出一个对象</li>
+<li>象普通的对象一样操作它的属性<br>比如这样操作也是合法的。 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.foo = <span class="number">1</span>;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">Object</span>.foo); <span class="comment">// 打印出 1</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>顺带说一句，typeof 操作符是个坏设计，无法分区对象的具体类型，可以对照见下列的第二个表格中的具体示例。我们可以借助 Object.prototype.toString 或第三方库的替代方案得到真正想要的结果。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">Object</th>
+<th style="text-align:center">Function</th>
+<th style="text-align:center">Date</th>
+<th style="text-align:center">Array</th>
+<th style="text-align:center">Foo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">typeof ???</td>
+<td style="text-align:center">“function”</td>
+<td style="text-align:center">“function”</td>
+<td style="text-align:center">“function”</td>
+<td style="text-align:center">“function”</td>
+<td style="text-align:center">“function”</td>
+</tr>
+<tr>
+<td style="text-align:center">toString.apply(???)</td>
+<td style="text-align:center">“[object Function]”</td>
+<td style="text-align:center">“[object Function]”</td>
+<td style="text-align:center">“[object Function]”</td>
+<td style="text-align:center">“[object Function]”</td>
+<td style="text-align:center">“[object Function]”</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">{}</th>
+<th style="text-align:center">[]</th>
+<th style="text-align:center">Math</th>
+<th style="text-align:center">JSON</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">typeof ???</td>
+<td style="text-align:center">“object”</td>
+<td style="text-align:center">“object”</td>
+<td style="text-align:center">“object”</td>
+<td style="text-align:center">“object”</td>
+</tr>
+<tr>
+<td style="text-align:center">toString.apply(???)</td>
+<td style="text-align:center">“[object Object]”</td>
+<td style="text-align:center">“[object Array]”</td>
+<td style="text-align:center">“[object Math]”</td>
+<td style="text-align:center">“[object JSON]”</td>
+</tr>
+</tbody>
+</table>
+<p>注：<br>  var toString = Object.prototype.toString<br>  var Foo = function() {}</p>
+<h3 id="u57FA_u4E8E_u539F_u578B_u7684_u9762_u5411_u5BF9_u8C61"><a href="#u57FA_u4E8E_u539F_u578B_u7684_u9762_u5411_u5BF9_u8C61" class="headerlink" title="基于原型的面向对象"></a>基于原型的面向对象</h3><p>JavaScript 是支持面向对象编程范式的语言，跟基于类的面向对象语言（如 C++ 、 Java 、 C# 等语言）不同，Javascript 是基于原型的面向对象设计。出于某种妥协，从语法上构建一个对象跟传统的基于类的面向对象语言类似，都是通过 new 操作符创建，但是工作方式存在巨大的差别。这种使用 new 操作符创建对象的方式由于隐藏了基于原型的面向对象机制，方便传统程序员的习惯，也容易引起初学者混淆，是存在争议的。<br>JavaScript 对象拥有一个不对外公开的 <code>__proto__</code> 属性引用到对象的原型，获取对象属性值的过程为：</p>
+<ol>
+<li>首先获取对象自身属性的值</li>
+<li>如果对象本身的属性不存在，者获取对象原型引用的属性值</li>
+<li>依次类推，直到原型引用为空</li>
+</ol>
+<p>下面的代码片段是 JavaScript 使用传统风格的面向对象示例。 Person 为构造函数，通过 new 操作符调用，返回初始化的对象； Person.prototype 定义原型，所有构造函数创建出来的对象，其 <code>__proto__</code> 引用到 Person.prototype。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Person</span>(<span class="params">firstName, lastName, age, gender</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.firstName = firstName;</span><br><span class="line">    <span class="keyword">this</span>.lastName = lastName;</span><br><span class="line">    <span class="keyword">this</span>.age = age;</span><br><span class="line">    <span class="keyword">this</span>.gender = gender;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Person.prototype.nationality = <span class="string">'China'</span>;</span><br><span class="line"></span><br><span class="line">Person.prototype.getName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.firstName + <span class="string">' '</span> + <span class="keyword">this</span>.lastName;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Person.prototype.getAge = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.age;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Person.prototype.getGender = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.gender;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Employee</span>(<span class="params">firstName, lastName, age, gender, title</span>) </span>&#123;</span><br><span class="line">    Person.apply(<span class="keyword">this</span>, <span class="built_in">arguments</span>);</span><br><span class="line">    <span class="keyword">this</span>.title = title;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Employee.prototype = <span class="keyword">new</span> Person();</span><br><span class="line"></span><br><span class="line">Employee.prototype.constructor = Employee;</span><br><span class="line"></span><br><span class="line">Employee.prototype.getName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Person.prototype.getName.apply(<span class="keyword">this</span>) + <span class="string">', '</span> + <span class="keyword">this</span>.title;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> classicalPerson = <span class="keyword">new</span> Person(<span class="string">'San'</span>, <span class="string">'Su'</span>, <span class="number">10</span>, <span class="string">'female'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(classicalPerson.getName()); <span class="comment">// San Su</span></span><br><span class="line"><span class="keyword">var</span> classicalEmployee = <span class="keyword">new</span> Employee(<span class="string">'San'</span>, <span class="string">'Su'</span>, <span class="number">10</span>, <span class="string">'female'</span>, <span class="string">'Manager'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(classicalEmployee.getName()); <span class="comment">// San Su, Manager</span></span><br></pre></td></tr></table></figure></p>
+<p>再比较一下基于原型的面向对象的实现，跟上一个代码片段的功能是等价的，可以看到这种原生的实现方式简洁且同样富有表现力。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> personPrototype = &#123;</span><br><span class="line">    nationality: <span class="string">'China'</span>, </span><br><span class="line">    getName: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.firstName + <span class="string">' '</span> + <span class="keyword">this</span>.lastName; </span><br><span class="line">    &#125;,</span><br><span class="line">    getAge: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.age;</span><br><span class="line">    &#125;,</span><br><span class="line">    getGender: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.gender;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> prototypalPerson = <span class="built_in">Object</span>.create(personPrototype);</span><br><span class="line"></span><br><span class="line">prototypalPerson.firstName = <span class="string">'San'</span>;</span><br><span class="line">prototypalPerson.lastName = <span class="string">'Su'</span>;</span><br><span class="line">prototypalPerson.age = <span class="number">10</span>;</span><br><span class="line">prototypalPerson.gender = <span class="string">'female'</span>;</span><br><span class="line"></span><br><span class="line">prototypalPerson.getName(); <span class="comment">// San Su</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> employeePrototype = <span class="built_in">Object</span>.create(personPrototype);</span><br><span class="line">employeePrototype.getName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> personPrototype.getName.apply(<span class="keyword">this</span>) + <span class="string">', '</span> + <span class="keyword">this</span>.title;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">employeePrototype.firstName = <span class="string">'San'</span>;</span><br><span class="line">employeePrototype.lastName = <span class="string">'Su'</span>;</span><br><span class="line">employeePrototype.age = <span class="number">10</span>;</span><br><span class="line">employeePrototype.gender = <span class="string">'female'</span>;</span><br><span class="line">employeePrototype.title = <span class="string">'Manager'</span>;</span><br><span class="line"></span><br><span class="line">employeePrototype.getName();  <span class="comment">// San Su, Manager</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="u51FD_u6570_u5F0F_u7279_u6027"><a href="#u51FD_u6570_u5F0F_u7279_u6027" class="headerlink" title="函数式特性"></a>函数式特性</h3><p>JavaScript 是以函数作为一等公民的语言，支持 lambda 表达式，高阶函数，柯里化等函数式特性。下面的代码片段是柯里化的实现示例，将 add 函数施加柯里化函数编程变成一个新的函数。 顺便说明一下，示例代码中使用了 arguments 对象，这个对象是一种类数组的对象，通过 <code>Object.prototype.apply(arguments)</code> 可以得验证，其结果是 <code>&quot;[object Object]&quot;</code>，需要通过 <code>Array.prototype.slice</code> 函数转换成 Array ， arguments 对象是一种坏的设计，需要加以注意。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">curry</span>(<span class="params">fn</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> slice = <span class="built_in">Array</span>.prototype.slice;</span><br><span class="line">    args = slice.call(<span class="built_in">arguments</span>, <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> fn.apply(<span class="literal">null</span>, args.concat(slice.apply(<span class="built_in">arguments</span>)));</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> plusOne = curry(add, <span class="number">1</span>);</span><br><span class="line">plusOne(<span class="number">3</span>); <span class="comment">// 4;</span></span><br><span class="line">curry(add, <span class="number">2</span>)(<span class="number">3</span>); <span class="comment">// 5</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="u574F_u7684_u8BBE_u8BA1"><a href="#u574F_u7684_u8BBE_u8BA1" class="headerlink" title="坏的设计"></a>坏的设计</h2><h3 id="u5168_u5C40_u53D8_u91CF"><a href="#u5168_u5C40_u53D8_u91CF" class="headerlink" title="全局变量"></a>全局变量</h3><p>全局变量可以说是 JavaScript 语言的万恶之源，有三种方式可以定义全局变量：</p>
+<ol>
+<li><p>在任何函数之外定义</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = value;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过全局对象的属性</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.foo = value; <span class="comment">// 在node.js中为 global.foo = value;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>直接使用没有申明的变量</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">foo = value; <span class="comment">// 在node.js中为 global.foo = value;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>第三种定义方式是罪魁祸首，一不小心就会定义或使用全局变量，引起难以排查的Bug。</p>
+<h3 id="u4F5C_u7528_u57DF"><a href="#u4F5C_u7528_u57DF" class="headerlink" title="作用域"></a>作用域</h3><p>JavaScript 使用了类似 C 语言的使用花括号的代码块设计，但是跟 C 语言不同的是代码块并不会隔离出一个单独的作用域，JavaScript 是以函数为单位创建作用域的。这种松散的作用域设计与全局变量的设计遥相呼应，成为一对奇葩组合，祸害了一批又一批无辜的前端码农。 </p>
+<h3 id="u81EA_u52A8_u63D2_u5165_u5206_u53F7"><a href="#u81EA_u52A8_u63D2_u5165_u5206_u53F7" class="headerlink" title="自动插入分号"></a>自动插入分号</h3><p>JavaScript 解释器检测到代码行的最后如果缺少分号会企图自动补一个分号进行修正。这种设计会带来另外一个后果，先看下代码示例。getFoo 被调用之后会得到正确的对象，getFoo_undefined 被调用之后会得到 undefined 。所以，JavaScript 程序员对左花括号是否需要另起一行的终极问题上是没有争议的，我们要顺势而为。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFoo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        foo: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getFoo_undefined</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">    &#123;</span><br><span class="line">        foo: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="undeclared__u3001_undefined__u4E0E_null"><a href="#undeclared__u3001_undefined__u4E0E_null" class="headerlink" title="undeclared 、 undefined 与 null"></a>undeclared 、 undefined 与 null</h3><p>下面的表格列举了 undeclared variable 、undefined variable 和 null varialble  的区别。 值得注意的是 null 是一种特殊的对象。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">undeclared</th>
+<th style="text-align:center">undefined</th>
+<th style="text-align:center">null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>描述</strong></td>
+<td style="text-align:center">未申明的变量</td>
+<td style="text-align:center">已申明未赋值的变量</td>
+<td style="text-align:center">已申明赋空值的变量</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>typeof ???</strong></td>
+<td style="text-align:center">“undefined”</td>
+<td style="text-align:center">“undefined”</td>
+<td style="text-align:center">“object”</td>
+</tr>
+</tbody>
+</table>
+<p>注：<br>  var toString = Object.prototype.toString</p>
+<h3 id="Number_u7C7B_u578B"><a href="#Number_u7C7B_u578B" class="headerlink" title="Number类型"></a>Number类型</h3><p>虽然我们在很多时候可以肆无忌惮地写出 <code>if (foo === 1) { /* do something */ }</code> 这样的代码通常是没有问题的，但是我们还是需要做到心里有数，JavaScript 中的 Number 是浮点型，不存在整形甚至不是 decimal 类型。再看段代码：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = (<span class="number">0.2</span> - <span class="number">0.1</span>) * <span class="number">10</span> === <span class="number">1</span>; <span class="comment">// foo equals true</span></span><br><span class="line"><span class="keyword">var</span> bar = (<span class="number">0.3</span> - <span class="number">0.2</span>) * <span class="number">10</span> === <span class="number">1</span>; <span class="comment">// bar equals false</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="u7ED3_u675F_u8BED"><a href="#u7ED3_u675F_u8BED" class="headerlink" title="结束语"></a>结束语</h2><p>可能有些同学看出来了，这篇文章根本就是 <a href="http://book.douban.com/subject/2994925/" target="_blank" rel="external">JavaScript: The Good Parts</a> 的学习笔记啊。这本书确实是 JavaScript 领域必备图书之一，在 2008 年出版，是基于 EcmaScript 3 的标准。可以看到 EcmaScript 5 / EcmaScript 6 针对这本书上列举的痛点基本都做了改进，甚至是飞跃。了解 EcmaScript 3 的基本知识，对理解 JavaScript 语言和生态圈的演化有非常大的帮助。</p>
+<p>原文：<a href="http://lishaopeng.com/2016/01/16/js-good_bad/">后端程序员的 JavaScript 之旅 - 好的设计与坏的设计</a><br>简书：<a href="http://www.jianshu.com/p/0f2328fd26e4" target="_blank" rel="external">后端程序员的 JavaScript 之旅 - 好的设计与坏的设计</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-good_bad-title.jpg" alt="好的设计与坏的设计"><br>JavaScript 可能是迄今为止最被误解的语言，它包含的许多美妙设计被其同样包含的糟糕设计所淹没，总体上给人的印象是一种没有做好充分设计的、稍显混乱的玩具语言。现在我们再重新梳理一下语言的基本特性，仔细分辨哪些是好的、哪些是坏的。</p>
+<p>维基百科是这样描述 JavaScript 的：</p>
+<blockquote>
+<p>JavaScript is a high-level, dynamic, untyped, and interpreted programming language. It has been standardized in the ECMAScript language specification. Alongside HTML and CSS, it is one of the three essential technologies of World Wide Web content production; the majority of websites employ it and it is supported by all modern web browsers without plug-ins. JavaScript is prototype-based with first-class functions, making it a multi-paradigm language, supporting object-oriented, imperative, and functional programming styles. It has an API for working with text, arrays, dates and regular expressions, but does not include any I/O, such as networking, storage or graphics facilities, relying for these upon the host environment in which it is embedded.</p>
+</blockquote>
+<p>可以清楚地看到， JavaScript 是高级的、动态的、弱类型的、解释型的语言。同时又指出它是基于原型的、以函数作为一等公民的，同时支持面向对象的、命令式的、具有函数式编程风格的多范式语言。是不是比第一印象中的强大很多？事实上，在支持多编程范式这一点上，跟 Java 、 C# 等语言相比是赢在起跑线上的。<br>]]>
+    
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[后端程序员的 JavaScript 之旅 - 开篇]]></title>
+    <link href="http://lishaopeng.com/2016/01/15/js-kickoff/"/>
+    <id>http://lishaopeng.com/2016/01/15/js-kickoff/</id>
+    <published>2016-01-15T14:24:15.000Z</published>
+    <updated>2016-03-07T12:46:47.126Z</updated>
+    <content type="html"><![CDATA[<p><img src="/./images/js-kickoff-title.jpg" alt="开篇"><br>很长时间以来 JavaScript 被当做一种玩具语言，全局变量、模块化缺失、基本类型不完备、缺乏文件 IO 支持等等，基本上只是依附于浏览器的配角。2005 年前后，Google 相继推出 Gmail 、 Google Map 等产品，这些使用 Ajax 技术实现异步无刷新的 Web 应用可媲美本地应用，让 JavaScript 大放溢彩，也引领了 Web 技术的发展方向。之后 jQuery  、 YUI 、 Ext JS 、 Bootstrap 等一系列优秀的框架涌现，前端技术开始大爆发。然而作为一名后端程序员，我并不热衷前端的技术，只是凑个热闹围观而已。直到 Node.js 的出现， JavaScript 再一次由于天生的异步特性和不完善的语言特性被历史选中（不完善在这里是特点，不是缺点），完美蜕变一统前后端开发领域，大有取代 PHP 成为世界上最好的开发语言之势，即使作为一名后端程序员也有足够的动力来重新审视这门神奇的语言。<br>话说关于 JavaScript 的博客无数，这个系列（如果能坚持写的话）只是沧海一粟，还不是最好的那一粟，为什么我还是有意愿重复造轮子呢？王小波说过，写作最希望的是提升自己。没错，是提升自己。<br>此为开篇。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/./images/js-kickoff-title.jpg" alt="开篇"><br>很长时间以来 JavaScript 被当做一种玩具语言，全局变量、模块化缺失、基本类型不完备、缺乏文件 IO 支持等等，基本上只是依附于浏览器的配角。2005 年前]]>
+    </summary>
+    
+      <category term="JavaScript" scheme="http://lishaopeng.com/tags/JavaScript/"/>
+    
+      <category term="JavaScript 之旅系列" scheme="http://lishaopeng.com/tags/JavaScript-%E4%B9%8B%E6%97%85%E7%B3%BB%E5%88%97/"/>
+    
+  </entry>
+  
+</feed>

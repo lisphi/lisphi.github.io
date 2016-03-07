@@ -1,0 +1,855 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="互联网,JavaScript,Web" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="李少鹏的网络日志" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="上一篇文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="后端程序员的 JavaScript 之旅 - 模块化（二）">
+<meta property="og:url" content="http://lishaopeng.com/2016/02/11/js-module2/index.html">
+<meta property="og:site_name" content="李少鹏的网络日志">
+<meta property="og:description" content="上一篇文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出">
+<meta property="og:image" content="http://lishaopeng.com/./images/js-module-title.jpg">
+<meta property="og:image" content="http://lishaopeng.com/./images/js-module2-counts.jpg">
+<meta property="og:image" content="http://lishaopeng.com/./images/js-module2-dir.png">
+<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 模块化（二）">
+<meta name="twitter:description" content="上一篇文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 后端程序员的 JavaScript 之旅 - 模块化（二） | 李少鹏的网络日志 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?073678c76cddabb5e3dc07b783ff0304";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">李少鹏的网络日志</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">网络改变沉默的大多数</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu menu-left">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+      
+        <li class="menu-item menu-item-search">
+          <a href="#" class="st-search-show-outputs">
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <form class="site-search-form">
+  <input type="text" id="st-search-input" class="st-search-input st-default-search-input" />
+</form>
+
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+    (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+    e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install', 'fKqe3aL4fXhgxFXssXhq','2.0.0');
+</script>
+
+
+
+    </div>
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                后端程序员的 JavaScript 之旅 - 模块化（二）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-02-11T10:20:53+08:00" content="2016-02-11">
+              2016-02-11
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/02/11/js-module2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/11/js-module2/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/./images/js-module-title.jpg" alt="模块化"><br><a href="http://lishaopeng.com/2016/02/05/js-module/">上一篇</a>文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出来的比较有影响力的模块规范 CommonJS、AMD 以及 2015 年正式发布的 ECMAScript 6 Modules 部分。<br><a id="more"></a><br>下面的图表是来自 <a href="http://www.modulecounts.com/" target="_blank" rel="external">Module Counts</a> 的统计数据，可以看到 npm （CommonJS 规范） 的包数量增长曲线异常凶猛，其中一部分原因是 JavaScript 社区对模块规范需求释放的力量惊人，由此可见模块标准对生态圈的重要性。<br><img src="/./images/js-module2-counts.jpg" alt="module counts"></p>
+<h2 id="CommonJS"><a href="#CommonJS" class="headerlink" title="CommonJS"></a>CommonJS</h2><p>CommonJS 的前称是 ServerJS，由 Mozilla 工程师 Kevin Dangoor 在 2009 年 1 月发起，目标是为非浏览器（比如服务端、本地桌面应用、命令行应用）构建 JavaScript 生态系统，同年 8 月改名为 CommonJS，其目标也扩展到浏览器。CommonJS 的规范包括模块(Modules)、包(Package)、Promises 等多个方面，详情可查阅 <a href="http://wiki.commonjs.org/wiki/CommonJS" target="_blank" rel="external">CommonJS Wiki</a>。CommonJS 规范有很多的实现，清单可以看<a href="https://en.wikipedia.org/wiki/CommonJS" target="_blank" rel="external">这里</a>，其中最著名的实现就是 Node.js，接下来就以它作为例子介绍 CommonJS 的模块规范。<br>math.js 文件（也是模块）的功能是定义数学函数，目前仅实现 add 函数，通过 exports 变量作为其 add 属性导出。 exports 变量是由加载 math.js 时的底层环境提供的。<br>increament.js 文件（也是模块）的功能是定义 increment 函数，其依赖于 math.js 模块。 这个文件展示了如何定义模块之外还展示了如何导入模块，即通过 <code>require</code> 函数导入。 <code>require</code> 函数也是模块加载的底层环境提供的，具体的用法可以参考 <a href="https://nodejs.org/api/modules.html" target="_blank" rel="external">node.js 的官方文档</a>或<a href="http://lodejs.org/api/modules.html" target="_blank" rel="external">国内镜像站点</a>。<br>main.js 展示如何导入模块以及如何使用导出函数。<br><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">exports.add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> add = <span class="built_in">require</span>(<span class="string">'math'</span>).add;</span><br><span class="line">exports.increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'increment'</span>).increment;</span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">inc(a); <span class="comment">// =&gt; 2</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.id == <span class="string">"main"</span>;</span><br></pre></td></tr></table></figure></p>
+<h2 id="AMD"><a href="#AMD" class="headerlink" title="AMD"></a>AMD</h2><p>AMD 是”Asynchronous Module Definition”的缩写，意思是「异步模块定义」，它跟 CommonJS 有一些渊源。AMD 的出现是由于 CommonJS 的模块规范对浏览器支持不友好，当然解决方式有多种多样，社区也有许多争论，具体可以参考玉伯（CMD/sea.js 作者）的文章<a href="https://github.com/seajs/seajs/issues/588" target="_blank" rel="external">《前端模块化开发那点历史》</a>。总之最终 AMD 规范没有得到 CommonJS 社区的认同决定自立门户，并且追随者众多，实现其规范的佼佼者有 Dojo Toolkit、RequireJS 等。<br>与 CommonJS 相比，AMD 解决了浏览器环境异步加载 js 文件避免网页失去响应以及模块之间依赖的问题。<br>现在用 RequireJS 实现上一节中的示例。<br>RequireJS 通过 define 函数定义模块，该函数的第一个参数指定当前所定义的模块 ID，第二个参数指定依赖的模块列表，第三个参数定义模块的实现函数，另外前两个参数是可选的。<br><strong>AMD 定义函数说明</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">define(</span><br><span class="line">    module_id <span class="comment">/*optional*/</span>, </span><br><span class="line">    [dependencies] <span class="comment">/*optional*/</span>, </span><br><span class="line">    definition <span class="comment">/*function for instantiating the module or object*/</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p><strong>目录结构</strong></p>
+<ol>
+<li>index.html 文件中，导入 require.js 的 javascript 标签中包含 <code>data-main=&quot;app&quot;</code> 属性，表示加载的主数据文件为 app.js 。</li>
+<li>app.js 中通过 <code>requirejs.config</code> 配置目录结构，并且加载 main.js 文件。</li>
+<li>main.js 通过 define 作为入口导入带 require 参数的匿名函数，匿名函数体内实现具体功能，通过 require 函数导入其他模块。</li>
+<li>increment.js 和 math.js 按规规范，通过 define 函数实现模块。</li>
+</ol>
+<p><img src="/./images/js-module2-dir.png" alt="目录结构"></p>
+<p><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="string">'math'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> x + y;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        add: add</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="string">'increment'</span>, [<span class="string">'math'</span>], <span class="function"><span class="keyword">function</span>(<span class="params">math</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> add = math.add;</span><br><span class="line">    <span class="keyword">var</span> increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        increment: increment</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">define(<span class="function"><span class="keyword">function</span> (<span class="params">require</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'increment'</span>).increment;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'inc =&gt; '</span> + inc);</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(inc(a, <span class="number">1</span>)); <span class="comment">// =&gt; 2</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p><strong>app.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">requirejs.config(&#123;</span><br><span class="line">    baseUrl: <span class="string">'lib'</span>,</span><br><span class="line">    paths: &#123;</span><br><span class="line">        app: <span class="string">'../app'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">requirejs([<span class="string">'app/main'</span>]);</span><br></pre></td></tr></table></figure></p>
+<p><strong>index.html</strong><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="doctype">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="title">html</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">head</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">script</span> <span class="attribute">data-main</span>=<span class="value">"app"</span> <span class="attribute">src</span>=<span class="value">"lib/require.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="title">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="title">body</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="title">h1</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="title">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="title">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="title">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="UMD/CMD"><a href="#UMD/CMD" class="headerlink" title="UMD/CMD"></a>UMD/CMD</h2><p>UMD 是 “Universal Module Definition” 的缩写，提供了一系列模式同时兼容 CommonJS 和 AMD ，代价是代码有些丑陋。<br>CMD 是 “Common Module Definition” 的缩写，是国内的前端大牛玉伯提出的，实现是 sea.js ，在国内比较知名。不过目前作者已经宣布放弃 sea.js，可以参考 github 上的讨论：<a href="https://github.com/seajs/seajs/issues/1605" target="_blank" rel="external">《感觉一直追赶的SeaJS已死》</a>。</p>
+<h2 id="ECMAScript_6_Modules"><a href="#ECMAScript_6_Modules" class="headerlink" title="ECMAScript 6 Modules"></a>ECMAScript 6 Modules</h2><p>令人振奋的消息是 2015 年 6 月正式发布的 ECMAScript 6 包含了模块规范，采用申明式的语法，使用 import、export 这两个关键字，同时照顾到 Common.JS 社区和 AMD 社区的使用习惯，方便地实现模块的定义和导入。<br>我们再用 ES6 的语法实现一遍上面两节的示例。<br><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> math <span class="keyword">from</span> <span class="string">'math'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> add = math.add;</span><br><span class="line">exports <span class="function"><span class="keyword">function</span> <span class="title">increment</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; increment &#125; <span class="keyword">from</span> <span class="string">'increment'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">increment(a); <span class="comment">// =&gt; 2</span></span><br></pre></td></tr></table></figure></p>
+<p>ES6 正式发布到目前为止还不到半年时间，推广还需要很长一段时间。目前主流的浏览器比如 Chorme、Firefox 还仅支持部分 ES6 的特性，具体可以参考 <a href="https://kangax.github.io/compat-table/es6/" target="_blank" rel="external">ECMAScript 6 compatibility table</a>，所以目前正在进行的项目押宝在 ES 6 Modules 具有一定风险。<br>目前想使用最新的 ES6 新特性可以：</p>
+<ul>
+<li><a href="https://github.com/google/traceur-compiler" target="_blank" rel="external">traceur</a> 将ES6模块编译为AMD规范或者CommonJS规范的模块</li>
+<li><a href="https://github.com/esnext/es6-module-transpiler" target="_blank" rel="external">es6 module transpiler</a> 是Google的转换编译器，目的在于支持许多Javascript的特性包括ES6模块</li>
+<li><a href="http://www.typescriptlang.org/" target="_blank" rel="external">TypeScript</a> 微软出品的 JavaScript 超集语言，也支持 ES6 模块</li>
+</ul>
+<p>参考：<br><a href="https://github.com/seajs/seajs/issues/588" target="_blank" rel="external">前端模块化开发那点历史</a><br><a href="http://huangxuan.me/2015/07/09/js-module-7day/" target="_blank" rel="external">JavaScript 模块化七日谈</a><br><a href="https://book.douban.com/subject/25768396/" target="_blank" rel="external">深入浅出Node.js</a><br><a href="http://requirejs.org/" target="_blank" rel="external">RequireJS.org</a><br><a href="https://addyosmani.com/writing-modular-js/" target="_blank" rel="external">Writing Modular JavaScript With AMD, CommonJS &amp; ES Harmony</a><br><a href="http://www.infoq.com/news/2013/08/es6-modules" target="_blank" rel="external">ECMAScript 6 Modules: What Are They and How to Use Them Today</a><br><a href="http://www.2ality.com/2014/09/es6-modules-final.html" target="_blank" rel="external">ECMAScript 6 modules: the final syntax</a></p>
+<p>后端程序员的 JavaScript 之旅 - 模块化系列文章：<br><a href="http://lishaopeng.com/2016/02/05/js-module/">后端程序员的 JavaScript 之旅 - 模块化（一）</a> | <a href="http://www.jianshu.com/p/590003321975" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/11/js-module2/">后端程序员的 JavaScript 之旅 - 模块化（二）</a> | <a href="http://www.jianshu.com/p/86cca0c4447d" target="_blank" rel="external">简书</a><br><a href="http://lishaopeng.com/2016/02/19/js-module3/">后端程序员的 JavaScript 之旅 - 模块化（三）</a> | <a href="http://www.jianshu.com/p/4ac788a67d11" target="_blank" rel="external">简书</a></p>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag">#JavaScript</a>
+          
+            <a href="/tags/JavaScript-之旅系列/" rel="tag">#JavaScript 之旅系列</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/05/js-module/" rel="next" title="后端程序员的 JavaScript 之旅 - 模块化（一）">
+                <i class="fa fa-chevron-left"></i> 后端程序员的 JavaScript 之旅 - 模块化（一）
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/19/js-module3/" rel="prev" title="后端程序员的 JavaScript 之旅 - 模块化（三）">
+                后端程序员的 JavaScript 之旅 - 模块化（三） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/02/11/js-module2/"
+           data-title="后端程序员的 JavaScript 之旅 - 模块化（二）" data-url="http://lishaopeng.com/2016/02/11/js-module2/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/benja.jpg"
+               alt="李少鹏" />
+          <p class="site-author-name" itemprop="name">李少鹏</p>
+          <p class="site-description motion-element" itemprop="description">互联网相关技术博客</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+          
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/lisphi" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> 微博
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/lisphi" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 豆瓣
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/benjali" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 知乎
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/users/C1y1Jt" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 简书
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://toutiao.io/subjects/62167" target="_blank">
+                  
+                    <i class="fa fa-globe"></i> 头条
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CommonJS"><span class="nav-number">1.</span> <span class="nav-text">CommonJS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AMD"><span class="nav-number">2.</span> <span class="nav-text">AMD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UMD/CMD"><span class="nav-number">3.</span> <span class="nav-text">UMD/CMD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ECMAScript_6_Modules"><span class="nav-number">4.</span> <span class="nav-text">ECMAScript 6 Modules</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <!--
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  -->
+  <span class="author" itemprop="copyrightHolder">李少鹏</span>
+</div>
+
+<div class="powered-by">
+  pwoered by <a class="theme-link" href="http://hexo.io">Hexo</a> 
+</div>
+
+<div class="theme-info">
+  theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  
+
+
+  
+
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=0.5.0"></script>
+
+
+
+  
+  
+<script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = NexT.utils.escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    NexT.motion.middleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          NexT.utils.displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"lishaopeng"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+
+  
+  
+
+
+</body>
+</html>
