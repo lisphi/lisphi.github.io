@@ -4,7 +4,7 @@
   <subtitle><![CDATA[网络改变沉默的大多数]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://lishaopeng.com/"/>
-  <updated>2016-03-17T15:41:35.711Z</updated>
+  <updated>2016-03-17T15:49:55.315Z</updated>
   <id>http://lishaopeng.com/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://lishaopeng.com/2016/03/17/auth-claims-based/"/>
     <id>http://lishaopeng.com/2016/03/17/auth-claims-based/</id>
     <published>2016-03-17T13:20:51.000Z</published>
-    <updated>2016-03-17T15:41:35.711Z</updated>
+    <updated>2016-03-17T15:49:55.315Z</updated>
     <content type="html"><![CDATA[<p><img src="/images/auth-claims-based-title.jpg" alt="基于声明的认证"><br>认证与授权是计算机安全方面的两个基础概念。认证解决你是谁的问题 (who)，授权解决你能干什么的问题 (what)。计算机系统解决你是谁的问题，是依靠识别与人绑定的某种凭证来做判断的，比如通过判定预设的用户名和密码是否匹配，或者读取人持有的 IC 卡、RFID、NFC 等信息来识别人的身份，当然随着科技的发展计算机的外设已经可以识别生物特征比如指纹识别、虹膜、人脸等特征。当然，计算机系统的用户不仅仅是人，也可能是其他的机器或系统，所以有必要对各种认证的手段做一个抽象，基于声明 (claims-based) 的认证就是这样一种抽象。<a id="more"></a></p>
 <h2 id="u4E00_u4E2A_u767B_u673A_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2A_u767B_u673A_u7684_u4F8B_u5B50" class="headerlink" title="一个登机的例子"></a>一个登机的例子</h2><p>解释基于声明的认证这个概念之前先介绍一个大家比较熟悉的机场登机的场景。假定你准备从上海到北京出差并且已经通过携程、艺龙或者去哪儿买了一张从上海到北京的机票。那么接下来的流程是这样：</p>
 <ol>
@@ -28,7 +28,7 @@
 <li>候机及登机。根据登机牌指示登记时间和登机口等候并登机。</li>
 </ol>
 <h2 id="u57FA_u672C_u6982_u5FF5"><a href="#u57FA_u672C_u6982_u5FF5" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="u8EAB_u4EFD__28Identity_29"><a href="#u8EAB_u4EFD__28Identity_29" class="headerlink" title="身份 (Identity)"></a>身份 (Identity)</h3><p>标识一个用户或者一个实体。在上面的例子中，身份是坐飞机的人。</p>
-<h3 id="u58F0_u660E__28Claim__29"><a href="#u58F0_u660E__28Claim__29" class="headerlink" title="声明　(Claim )"></a>声明　(Claim )</h3><p>Identity 的一系列属性比如姓名、email、角色等。在上面的例子中，声明指的是登机牌中展示的信息包括示姓名、性别、航班号等基础信息以及登机口、登机时间等专有信息。</p>
+<h3 id="u58F0_u660E__28Claim__29"><a href="#u58F0_u660E__28Claim__29" class="headerlink" title="声明 (Claim )"></a>声明 (Claim )</h3><p>Identity 的一系列属性比如姓名、email、角色等。在上面的例子中，声明指的是登机牌中展示的信息包括示姓名、性别、航班号等基础信息以及登机口、登机时间等专有信息。</p>
 <h3 id="u5B89_u5168_u4EE4_u724C__28Security_Token_29"><a href="#u5B89_u5168_u4EE4_u724C__28Security_Token_29" class="headerlink" title="安全令牌 (Security Token)"></a>安全令牌 (Security Token)</h3><p>将 Claim 的信息通过数字签名等技术手段得到的一个载体，由发行机构（机场）颁发。在上面的例子中，安全令牌就是登机牌，里面包含条形码等不可伪造的信息可以被机场的专有设备识别。通常在计算机系统中令牌可以仅仅是一个加密的信息，通过令牌可以向发行机构请求申明信息。</p>
 <h3 id="u53D1_u884C_u673A_u6784__28Issuing_Authroty_29"><a href="#u53D1_u884C_u673A_u6784__28Issuing_Authroty_29" class="headerlink" title="发行机构 (Issuing Authroty)"></a>发行机构 (Issuing Authroty)</h3><p>签发安全令牌的受信机构，可以是Web 应用或Web 服务。在上面的例子中发行机构是机场，它颁发登机牌。</p>
 <h3 id="u5B89_u5168_u4EE4_u724C_u670D_u52A1__28Security_Token_Service__29"><a href="#u5B89_u5168_u4EE4_u724C_u670D_u52A1__28Security_Token_Service__29" class="headerlink" title="安全令牌服务 (Security Token Service )"></a>安全令牌服务 (Security Token Service )</h3><p>提供构建安全令牌、签名、验证等服务。在上面的例子中，机场提供的值机台、安检口、登机口就是这种类型的服务。</p>
