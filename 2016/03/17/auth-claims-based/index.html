@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="互联网,JavaScript,Web" />
+  <meta name="keywords" content="Security," />
 
 
 
@@ -59,19 +59,18 @@
 
 
 
-<meta name="description" content="浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera">
+<meta name="description" content="认证与授权是计算机安全方面的两个基础概念。认证解决你是谁的问题 (who)，授权解决你能干什么的问题 (what)。计算机系统解决你是谁的问题，是依靠识别与人绑定的某种凭证来做判断的，比如通过判定预设的用户名和密码是否匹配，或者读取人持有的 IC 卡、RFID、NFC 等信息来识别人的身份，当然随着科技的发展计算机的外设已经可以识别生物特征比如指纹识别、虹膜、人脸等特征。当然，计算机系统的用户不仅">
 <meta property="og:type" content="article">
-<meta property="og:title" content="后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准">
-<meta property="og:url" content="http://lishaopeng.com/2016/02/26/js-spec/index.html">
+<meta property="og:title" content="认证与授权 - 基于声明的认证">
+<meta property="og:url" content="http://lishaopeng.com/2016/03/17/auth-claims-based/index.html">
 <meta property="og:site_name" content="李少鹏的网络日志">
-<meta property="og:description" content="浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera">
-<meta property="og:image" content="http://lishaopeng.com/images/js-spec-title.jpg">
-<meta property="og:image" content="http://lishaopeng.com/./images/js-spec-version.png">
-<meta property="og:image" content="http://lishaopeng.com/./images/js-spec-ecma.png">
-<meta property="og:updated_time" content="2016-03-17T13:32:29.255Z">
+<meta property="og:description" content="认证与授权是计算机安全方面的两个基础概念。认证解决你是谁的问题 (who)，授权解决你能干什么的问题 (what)。计算机系统解决你是谁的问题，是依靠识别与人绑定的某种凭证来做判断的，比如通过判定预设的用户名和密码是否匹配，或者读取人持有的 IC 卡、RFID、NFC 等信息来识别人的身份，当然随着科技的发展计算机的外设已经可以识别生物特征比如指纹识别、虹膜、人脸等特征。当然，计算机系统的用户不仅">
+<meta property="og:image" content="http://lishaopeng.com/images/auth-claims-based-title.jpg">
+<meta property="og:image" content="http://lishaopeng.com/images/auth-claims-based-model.jpg">
+<meta property="og:updated_time" content="2016-03-17T15:41:35.711Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准">
-<meta name="twitter:description" content="浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera">
+<meta name="twitter:title" content="认证与授权 - 基于声明的认证">
+<meta name="twitter:description" content="认证与授权是计算机安全方面的两个基础概念。认证解决你是谁的问题 (who)，授权解决你能干什么的问题 (what)。计算机系统解决你是谁的问题，是依靠识别与人绑定的某种凭证来做判断的，比如通过判定预设的用户名和密码是否匹配，或者读取人持有的 IC 卡、RFID、NFC 等信息来识别人的身份，当然随着科技的发展计算机的外设已经可以识别生物特征比如指纹识别、虹膜、人脸等特征。当然，计算机系统的用户不仅">
 
 
 
@@ -89,7 +88,7 @@
   };
 </script>
 
-  <title> 后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准 | 李少鹏的网络日志 </title>
+  <title> 认证与授权 - 基于声明的认证 | 李少鹏的网络日志 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -257,7 +256,7 @@
             
             
               
-                后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准
+                认证与授权 - 基于声明的认证
               
             
           </h1>
@@ -269,8 +268,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-02-26T21:35:43+08:00" content="2016-02-26">
-              2016-02-26
+            <time itemprop="dateCreated" datetime="2016-03-17T21:20:51+08:00" content="2016-03-17">
+              2016-03-17
             </time>
           </span>
 
@@ -280,8 +279,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/02/26/js-spec/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/26/js-spec/" itemprop="commentsCount"></span>
+                <a href="/2016/03/17/auth-claims-based/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/17/auth-claims-based/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -302,12 +301,28 @@
       
 
       
-        <p><img src="/images/js-spec-title.jpg" alt="JavaScript 的版本与标准"><br>浏览器的战场从来都是硝烟弥漫，从 Netscape Navigator 与 Microsoft Internet Explore 之争，IE 大获全胜一度市场占有率达 95%，再到后来 Mozilla Firefox 的崛起以及 Google Chrome 强势出击，浏览器出现群雄割据的局面。市面上的浏览器可以说是品类繁多，主流的有 IE 、Firefox、Chrome、Safari、Opera 以及 Microsoft Edge 等，中国市场也有许多本土企业推出的浏览器，比较有代表性的有 360 安全浏览器、搜狗高速浏览器、QQ 浏览器、遨游浏览器等。这一直就让我非常疑惑，浏览器中使用的 JavaScript 到底是什么版本呢？ 回答这个问题首先要从 JavaScript 的历史说起。<br><a id="more"></a></p>
-<h2 id="JavaScript__u5386_u53F2"><a href="#JavaScript__u5386_u53F2" class="headerlink" title="JavaScript 历史"></a>JavaScript 历史</h2><p>1995 年 5 月 JavaScript 的最初版本由网景公司的工程师 Brendan Eich 开发，目的是为了跟微软公司的 Web 技术平台竞争。JavaScript 最初随 Netscape Navigator 2.0 发布时的名称为 LiveScript，后来由于跟 Sun 公司合作为了市场原因把名称改为 JavaScript。需要指出的是，JavaScript 一开始就不仅仅使用在浏览器端，网景公司还将它应用在了 Netscape Enterprise Server 这个服务端的产品上。1996 年，微软公司通过对 JavaScript 的反向工程实现了自己的相类似的技术 JScript，这个领域的竞争出现了网景、Sun 以及微软三足鼎立的格局。1997 年，在ECMA（欧洲计算机制造商协会）的协调下，由网景、Sun、微软、Borland 组成的工作组确定统一标准：ECMA-262。我们通常所说的 ECMAScript 指得就是 ECMA-262，从此各大厂商提供 ECMA-262 的不同实现。从这个方面上说，刚开始提到的浏览器使用的 JavaScript 到底是什么版本这个问题不太准确。更准确的描述应该是问具体厂商实现 ECMA-262 标准的 JavaScript 引擎产品是什么版本。另外，ECMA-262 也在进化，也是按版本迭代的。由于 JavaScript 最初是由网景公司提出来的，我们通常按网景公司的实现做蓝本描述 JavaScript 的版本。</p>
-<h2 id="JavaScript__u7248_u672C"><a href="#JavaScript__u7248_u672C" class="headerlink" title="JavaScript 版本"></a>JavaScript 版本</h2><p>图中列出 JavaScript 版本与 ECMAScript 、各大厂商浏览器的对应关系。<br><img src="/./images/js-spec-version.png" alt="JavaScript 版本"></p>
-<h2 id="ECMAScript__u7248_u672C"><a href="#ECMAScript__u7248_u672C" class="headerlink" title="ECMAScript 版本"></a>ECMAScript 版本</h2><p><img src="/./images/js-spec-ecma.png" alt="JavaScript 版本"></p>
-<p>参考：<br><a href="https://en.wikipedia.org/wiki/JavaScript" target="_blank" rel="external">JavaScript</a><br><a href="https://en.wikipedia.org/wiki/ECMAScript" target="_blank" rel="external">ECMAScript</a><br><a href="https://en.wikipedia.org/wiki/JavaScript_engine" target="_blank" rel="external">JavaScript engine</a><br><a href="https://en.wikipedia.org/wiki/Web_browser" target="_blank" rel="external">Web Browser</a><br><a href="https://en.wikipedia.org/wiki/List_of_web_browsers" target="_blank" rel="external">List of web browsers</a><br><a href="https://en.wikipedia.org/wiki/Web_browser_engine" target="_blank" rel="external">Web browser engine</a></p>
-<p>原文：<a href="http://lishaopeng.com/2016/02/26/js-spec/">后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准</a></p>
+        <p><img src="/images/auth-claims-based-title.jpg" alt="基于声明的认证"><br>认证与授权是计算机安全方面的两个基础概念。认证解决你是谁的问题 (who)，授权解决你能干什么的问题 (what)。计算机系统解决你是谁的问题，是依靠识别与人绑定的某种凭证来做判断的，比如通过判定预设的用户名和密码是否匹配，或者读取人持有的 IC 卡、RFID、NFC 等信息来识别人的身份，当然随着科技的发展计算机的外设已经可以识别生物特征比如指纹识别、虹膜、人脸等特征。当然，计算机系统的用户不仅仅是人，也可能是其他的机器或系统，所以有必要对各种认证的手段做一个抽象，基于声明 (claims-based) 的认证就是这样一种抽象。<a id="more"></a></p>
+<h2 id="u4E00_u4E2A_u767B_u673A_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2A_u767B_u673A_u7684_u4F8B_u5B50" class="headerlink" title="一个登机的例子"></a>一个登机的例子</h2><p>解释基于声明的认证这个概念之前先介绍一个大家比较熟悉的机场登机的场景。假定你准备从上海到北京出差并且已经通过携程、艺龙或者去哪儿买了一张从上海到北京的机票。那么接下来的流程是这样：</p>
+<ol>
+<li>换登机牌。到值机柜台出示必要证件，工作人员核实你的身份以及购票记录给你一张登机牌。登机牌除了显示姓名、性别、航班号等基础信息外还包括登机口、登机时间等专有信息。登机牌还包含有条码可以被机场的专有扫描设备识别。</li>
+<li>安全检查，用登机牌以及必要证件通过安全检查进入候机大厅。</li>
+<li>候机及登机。根据登机牌指示登记时间和登机口等候并登机。</li>
+</ol>
+<h2 id="u57FA_u672C_u6982_u5FF5"><a href="#u57FA_u672C_u6982_u5FF5" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="u8EAB_u4EFD__28Identity_29"><a href="#u8EAB_u4EFD__28Identity_29" class="headerlink" title="身份 (Identity)"></a>身份 (Identity)</h3><p>标识一个用户或者一个实体。在上面的例子中，身份是坐飞机的人。</p>
+<h3 id="u58F0_u660E__28Claim__29"><a href="#u58F0_u660E__28Claim__29" class="headerlink" title="声明　(Claim )"></a>声明　(Claim )</h3><p>Identity 的一系列属性比如姓名、email、角色等。在上面的例子中，声明指的是登机牌中展示的信息包括示姓名、性别、航班号等基础信息以及登机口、登机时间等专有信息。</p>
+<h3 id="u5B89_u5168_u4EE4_u724C__28Security_Token_29"><a href="#u5B89_u5168_u4EE4_u724C__28Security_Token_29" class="headerlink" title="安全令牌 (Security Token)"></a>安全令牌 (Security Token)</h3><p>将 Claim 的信息通过数字签名等技术手段得到的一个载体，由发行机构（机场）颁发。在上面的例子中，安全令牌就是登机牌，里面包含条形码等不可伪造的信息可以被机场的专有设备识别。通常在计算机系统中令牌可以仅仅是一个加密的信息，通过令牌可以向发行机构请求申明信息。</p>
+<h3 id="u53D1_u884C_u673A_u6784__28Issuing_Authroty_29"><a href="#u53D1_u884C_u673A_u6784__28Issuing_Authroty_29" class="headerlink" title="发行机构 (Issuing Authroty)"></a>发行机构 (Issuing Authroty)</h3><p>签发安全令牌的受信机构，可以是Web 应用或Web 服务。在上面的例子中发行机构是机场，它颁发登机牌。</p>
+<h3 id="u5B89_u5168_u4EE4_u724C_u670D_u52A1__28Security_Token_Service__29"><a href="#u5B89_u5168_u4EE4_u724C_u670D_u52A1__28Security_Token_Service__29" class="headerlink" title="安全令牌服务 (Security Token Service )"></a>安全令牌服务 (Security Token Service )</h3><p>提供构建安全令牌、签名、验证等服务。在上面的例子中，机场提供的值机台、安检口、登机口就是这种类型的服务。</p>
+<h3 id="u4FE1_u4EFB_u65B9_u5E94_u7528__28Repling_Party_Application_29"><a href="#u4FE1_u4EFB_u65B9_u5E94_u7528__28Repling_Party_Application_29" class="headerlink" title="信任方应用 (Repling Party Application)"></a>信任方应用 (Repling Party Application)</h3><p>信任发行机构，使用其颁发的安全令牌获得 Claim 的应用。在上面的例子中，这个信任方应用就是某航空公司提供的指定班次的飞行服务。</p>
+<h2 id="u57FA_u4E8E_u7533_u660E_u7684_u8BA4_u8BC1_u6A21_u578B"><a href="#u57FA_u4E8E_u7533_u660E_u7684_u8BA4_u8BC1_u6A21_u578B" class="headerlink" title="基于申明的认证模型"></a>基于申明的认证模型</h2><p><img src="/images/auth-claims-based-model.jpg" alt="基于申明的身份模型"><br>这幅图说明一个 Web 站点（信任方应用，relying party application, RP）使用基于申明的进行认证，被用户通过浏览器访问的过程。</p>
+<ol>
+<li>未授权用户访问　Web 站点的页面会被重定向到身份提供者的页面。</li>
+<li>身份提供者要求用户提供凭证，比如用户名和密码。</li>
+<li>身份提供者颁发安全令牌返回到浏览器。</li>
+<li>浏览器重定向到刚开始要访问的那个页面，Web 站点根据安全令牌决定是否允许访问。</li>
+</ol>
+<p>参考：<br><a href="https://msdn.microsoft.com/en-us/library/ff423674.aspx" target="_blank" rel="external">A Guide to Claims-Based Identity and Access Control (2nd Edition)</a><br><a href="https://msdn.microsoft.com/en-us/library/hh377151(v=vs.110).aspx" target="_blank" rel="external">Windows Identity Foundation</a></p>
+<p>原文：<a href="http://lishaopeng.com/2016/03/17/auth-claims-based/">认证与授权 - 基于声明的认证</a></p>
 
       
     </div>
@@ -316,9 +331,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/JavaScript/" rel="tag">#JavaScript</a>
-          
-            <a href="/tags/JavaScript-之旅系列/" rel="tag">#JavaScript 之旅系列</a>
+            <a href="/tags/Security/" rel="tag">#Security</a>
           
         </div>
       
@@ -327,17 +340,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/02/19/js-module3/" rel="next" title="后端程序员的 JavaScript 之旅 - 模块化（三）">
-                <i class="fa fa-chevron-left"></i> 后端程序员的 JavaScript 之旅 - 模块化（三）
+              <a href="/2016/03/06/js-cbhell/" rel="next" title="后端程序员的 JavaScript 之旅 - 回调地狱终结者">
+                <i class="fa fa-chevron-left"></i> 后端程序员的 JavaScript 之旅 - 回调地狱终结者
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/03/06/js-cbhell/" rel="prev" title="后端程序员的 JavaScript 之旅 - 回调地狱终结者">
-                后端程序员的 JavaScript 之旅 - 回调地狱终结者 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -386,8 +395,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/02/26/js-spec/"
-           data-title="后端程序员的 JavaScript 之旅 - JavaScript 的版本与标准" data-url="http://lishaopeng.com/2016/02/26/js-spec/">
+      <div class="ds-thread" data-thread-key="2016/03/17/auth-claims-based/"
+           data-title="认证与授权 - 基于声明的认证" data-url="http://lishaopeng.com/2016/03/17/auth-claims-based/">
       </div>
     
   </div>
@@ -532,7 +541,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript__u5386_u53F2"><span class="nav-number">1.</span> <span class="nav-text">JavaScript 历史</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript__u7248_u672C"><span class="nav-number">2.</span> <span class="nav-text">JavaScript 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ECMAScript__u7248_u672C"><span class="nav-number">3.</span> <span class="nav-text">ECMAScript 版本</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E00_u4E2A_u767B_u673A_u7684_u4F8B_u5B50"><span class="nav-number">1.</span> <span class="nav-text">一个登机的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u57FA_u672C_u6982_u5FF5"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u8EAB_u4EFD__28Identity_29"><span class="nav-number">2.1.</span> <span class="nav-text">身份 (Identity)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u58F0_u660E__28Claim__29"><span class="nav-number">2.2.</span> <span class="nav-text">声明　(Claim )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5B89_u5168_u4EE4_u724C__28Security_Token_29"><span class="nav-number">2.3.</span> <span class="nav-text">安全令牌 (Security Token)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u53D1_u884C_u673A_u6784__28Issuing_Authroty_29"><span class="nav-number">2.4.</span> <span class="nav-text">发行机构 (Issuing Authroty)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5B89_u5168_u4EE4_u724C_u670D_u52A1__28Security_Token_Service__29"><span class="nav-number">2.5.</span> <span class="nav-text">安全令牌服务 (Security Token Service )</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4FE1_u4EFB_u65B9_u5E94_u7528__28Repling_Party_Application_29"><span class="nav-number">2.6.</span> <span class="nav-text">信任方应用 (Repling Party Application)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u57FA_u4E8E_u7533_u660E_u7684_u8BA4_u8BC1_u6A21_u578B"><span class="nav-number">3.</span> <span class="nav-text">基于申明的认证模型</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">

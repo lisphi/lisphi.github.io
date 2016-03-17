@@ -65,10 +65,10 @@
 <meta property="og:url" content="http://lishaopeng.com/2016/02/11/js-module2/index.html">
 <meta property="og:site_name" content="李少鹏的网络日志">
 <meta property="og:description" content="上一篇文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出">
-<meta property="og:image" content="http://lishaopeng.com/./images/js-module-title.jpg">
+<meta property="og:image" content="http://lishaopeng.com/images/js-module-title.jpg">
 <meta property="og:image" content="http://lishaopeng.com/./images/js-module2-counts.jpg">
 <meta property="og:image" content="http://lishaopeng.com/./images/js-module2-dir.png">
-<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta property="og:updated_time" content="2016-03-17T13:32:02.595Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 模块化（二）">
 <meta name="twitter:description" content="上一篇文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出">
@@ -302,7 +302,7 @@
       
 
       
-        <p><img src="/./images/js-module-title.jpg" alt="模块化"><br><a href="http://lishaopeng.com/2016/02/05/js-module/">上一篇</a>文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出来的比较有影响力的模块规范 CommonJS、AMD 以及 2015 年正式发布的 ECMAScript 6 Modules 部分。<br><a id="more"></a><br>下面的图表是来自 <a href="http://www.modulecounts.com/" target="_blank" rel="external">Module Counts</a> 的统计数据，可以看到 npm （CommonJS 规范） 的包数量增长曲线异常凶猛，其中一部分原因是 JavaScript 社区对模块规范需求释放的力量惊人，由此可见模块标准对生态圈的重要性。<br><img src="/./images/js-module2-counts.jpg" alt="module counts"></p>
+        <p><img src="/images/js-module-title.jpg" alt="模块化"><br><a href="http://lishaopeng.com/2016/02/05/js-module/">上一篇</a>文章介绍了 JavaScript 中如何现实模块化的一些常见的模式，仅仅了解如何实现 JavaScript 的模块化模式还是不够的，对于整个生态圈来说，模块化规范的制定和遵守更加重要。JS 模块化缺失带来的一个严重问题是各社区开发一套组件都需要实现自己的模块化机制，不同社区重复制造轮子，导致组件与组件无法兼容、相互割裂，严重阻碍生态系统的发展。这篇文章介绍 JavaScript 生态圈催生出来的比较有影响力的模块规范 CommonJS、AMD 以及 2015 年正式发布的 ECMAScript 6 Modules 部分。<br><a id="more"></a><br>下面的图表是来自 <a href="http://www.modulecounts.com/" target="_blank" rel="external">Module Counts</a> 的统计数据，可以看到 npm （CommonJS 规范） 的包数量增长曲线异常凶猛，其中一部分原因是 JavaScript 社区对模块规范需求释放的力量惊人，由此可见模块标准对生态圈的重要性。<br><img src="/./images/js-module2-counts.jpg" alt="module counts"></p>
 <h2 id="CommonJS"><a href="#CommonJS" class="headerlink" title="CommonJS"></a>CommonJS</h2><p>CommonJS 的前称是 ServerJS，由 Mozilla 工程师 Kevin Dangoor 在 2009 年 1 月发起，目标是为非浏览器（比如服务端、本地桌面应用、命令行应用）构建 JavaScript 生态系统，同年 8 月改名为 CommonJS，其目标也扩展到浏览器。CommonJS 的规范包括模块(Modules)、包(Package)、Promises 等多个方面，详情可查阅 <a href="http://wiki.commonjs.org/wiki/CommonJS" target="_blank" rel="external">CommonJS Wiki</a>。CommonJS 规范有很多的实现，清单可以看<a href="https://en.wikipedia.org/wiki/CommonJS" target="_blank" rel="external">这里</a>，其中最著名的实现就是 Node.js，接下来就以它作为例子介绍 CommonJS 的模块规范。<br>math.js 文件（也是模块）的功能是定义数学函数，目前仅实现 add 函数，通过 exports 变量作为其 add 属性导出。 exports 变量是由加载 math.js 时的底层环境提供的。<br>increament.js 文件（也是模块）的功能是定义 increment 函数，其依赖于 math.js 模块。 这个文件展示了如何定义模块之外还展示了如何导入模块，即通过 <code>require</code> 函数导入。 <code>require</code> 函数也是模块加载的底层环境提供的，具体的用法可以参考 <a href="https://nodejs.org/api/modules.html" target="_blank" rel="external">node.js 的官方文档</a>或<a href="http://lodejs.org/api/modules.html" target="_blank" rel="external">国内镜像站点</a>。<br>main.js 展示如何导入模块以及如何使用导出函数。<br><strong>math.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">exports.add = <span class="function"><span class="keyword">function</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <p><strong>increment.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> add = <span class="built_in">require</span>(<span class="string">'math'</span>).add;</span><br><span class="line">exports.increment = <span class="function"><span class="keyword">function</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> add(val, <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <p><strong>main.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> inc = <span class="built_in">require</span>(<span class="string">'increment'</span>).increment;</span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">inc(a); <span class="comment">// =&gt; 2</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.id == <span class="string">"main"</span>;</span><br></pre></td></tr></table></figure></p>
@@ -456,7 +456,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -466,7 +466,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

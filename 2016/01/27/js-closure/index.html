@@ -65,8 +65,8 @@
 <meta property="og:url" content="http://lishaopeng.com/2016/01/27/js-closure/index.html">
 <meta property="og:site_name" content="李少鹏的网络日志">
 <meta property="og:description" content="JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法">
-<meta property="og:image" content="http://lishaopeng.com/./images/js-closure-title.jpg">
-<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta property="og:image" content="http://lishaopeng.com/images/js-closure-title.jpg">
+<meta property="og:updated_time" content="2016-03-17T13:32:33.959Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 作用域链、执行上下文与闭包">
 <meta name="twitter:description" content="JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法">
@@ -300,7 +300,7 @@
       
 
       
-        <p><img src="/./images/js-closure-title.jpg" alt="作用域链、执行上下文与闭包"><br>JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法上的表达式一致的，f 被调用之后返回的是<code>local scope</code>。函数对象 f 在其主体函数 foo 调用结束之后，依然保持着 foo 函数体作用域变量的引用，这就是所谓的闭包 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scope;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> f = foo();</span><br><span class="line">f(); <span class="comment">// 返回 "local scope"</span></span><br></pre></td></tr></table></figure></p>
+        <p><img src="/images/js-closure-title.jpg" alt="作用域链、执行上下文与闭包"><br>JavaScript 采用词法作用域（lexical scoping），函数执行依赖的变量作用域是由函数定义的时候决定，而不是函数执行的时候决定。以下面的代码片段举例说明，通常来说（基于栈的实现，如 C 语言） foo 被调用之后函数内的本地变量 scope 会被释放，但是从词法上看 foo 的内嵌匿名函数中 scope 应该指的是 foo 的本地变量 scope ，并且实际上代码的运行结果跟词法上的表达式一致的，f 被调用之后返回的是<code>local scope</code>。函数对象 f 在其主体函数 foo 调用结束之后，依然保持着 foo 函数体作用域变量的引用，这就是所谓的闭包 。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scope = <span class="string">'global scope'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> scope = <span class="string">'local scope'</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> scope;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> f = foo();</span><br><span class="line">f(); <span class="comment">// 返回 "local scope"</span></span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
 <p>那么闭包到底是如何工作的呢？了解闭包首先需要了解变量作用域和作用域链，另外一个重要的概念是执行上下文环境。</p>
 <h2 id="u53D8_u91CF_u4F5C_u7528_u57DF"><a href="#u53D8_u91CF_u4F5C_u7528_u57DF" class="headerlink" title="变量作用域"></a>变量作用域</h2><p>JavaScript 中全局变量拥有全局的作用域，函数体内申明的变量的作用域是整个函数体内，是局部的，当然也包括函数体内定义的嵌套函数。函数体内局部变量的优先级高于全局变量，如果局部变量与全局变量重名，全局变量会被局部变量掩盖；同样嵌套函数内定义的局部变量的优先级高于嵌套函数所在函数的局部变量。这简直是显而易见的，几乎所有人都了解。<br>接下来谈谈可能大家比较陌生的。</p>
@@ -438,7 +438,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -448,7 +448,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

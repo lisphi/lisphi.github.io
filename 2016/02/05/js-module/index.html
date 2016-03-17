@@ -65,8 +65,8 @@
 <meta property="og:url" content="http://lishaopeng.com/2016/02/05/js-module/index.html">
 <meta property="og:site_name" content="李少鹏的网络日志">
 <meta property="og:description" content="ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《">
-<meta property="og:image" content="http://lishaopeng.com/./images/js-module-title.jpg">
-<meta property="og:updated_time" content="2016-03-07T12:46:47.126Z">
+<meta property="og:image" content="http://lishaopeng.com/images/js-module-title.jpg">
+<meta property="og:updated_time" content="2016-03-17T13:31:55.631Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="后端程序员的 JavaScript 之旅 - 模块化（一）">
 <meta name="twitter:description" content="ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《">
@@ -300,7 +300,7 @@
       
 
       
-        <p><img src="/./images/js-module-title.jpg" alt="模块化"><br>ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《后端程序员的 JavaScript 之旅 - 模块化》系列将分多个篇幅分别介绍 JavaScript 模块化实现的基本原理、模块化规范、业内比较流行的加载器以及 ES 6 的模块特性。阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/10/javascript_module.html" target="_blank" rel="external">《Javascript 模块化编程》</a>系列对模块化的内容有精彩的描述，这个系列写在 2012 年，JavaScript 生态圈在近几年发生了日新月异的变化，我会尝试增加一些新的内容。<br>本文全面介绍 <a href="http://www.adequatelygood.com/" target="_blank" rel="external">Ben Cherry</a> 在 <a href="http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html" target="_blank" rel="external">JavaScript Module Pattern: In-Depth</a> 一文中提到的 JavaScript 模块化设计模式。<br><a id="more"></a></p>
+        <p><img src="/images/js-module-title.jpg" alt="模块化"><br>ECMAScrip 6 之前，JavaScript 是天生模块化缺失的，代码之间隔离最基本的单位是函数，通常 JavaScript 的模块化也是采用函数来实现。模块化的缺失不利于大规模 Web App 的开发，促使生态圈催生出大量的模块化的规范，其中的代表是 CommonJS、AMD 和 UMD ，同样也产出许多优秀的模块加载器比如 RequireJS、Browserify、Webpack 等。《后端程序员的 JavaScript 之旅 - 模块化》系列将分多个篇幅分别介绍 JavaScript 模块化实现的基本原理、模块化规范、业内比较流行的加载器以及 ES 6 的模块特性。阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/10/javascript_module.html" target="_blank" rel="external">《Javascript 模块化编程》</a>系列对模块化的内容有精彩的描述，这个系列写在 2012 年，JavaScript 生态圈在近几年发生了日新月异的变化，我会尝试增加一些新的内容。<br>本文全面介绍 <a href="http://www.adequatelygood.com/" target="_blank" rel="external">Ben Cherry</a> 在 <a href="http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html" target="_blank" rel="external">JavaScript Module Pattern: In-Depth</a> 一文中提到的 JavaScript 模块化设计模式。<br><a id="more"></a></p>
 <h2 id="u57FA_u7840_u6A21_u5F0F"><a href="#u57FA_u7840_u6A21_u5F0F" class="headerlink" title="基础模式"></a>基础模式</h2><h3 id="u533F_u540D_u95ED_u5305"><a href="#u533F_u540D_u95ED_u5305" class="headerlink" title="匿名闭包"></a>匿名闭包</h3><p>匿名闭包是很常用的代码隔离方式，声明匿名对象并立即执行。匿名函数中声明的变量和方法以及匿名函数本身不会污染到函数体外，同时匿名函数的调用形成一个闭包，使函数体内可以使用函数体外声明的变量和方法。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="comment">// ... all vars and functions are in this scope only</span></span><br><span class="line">	<span class="comment">// still maintains access to all globals</span></span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></p>
 <h3 id="u5168_u5C40_u5BFC_u5165"><a href="#u5168_u5C40_u5BFC_u5165" class="headerlink" title="全局导入"></a>全局导入</h3><p>我们知道 JavaScript 全局变量的作用域贯穿全局，在函数内也可以使用甚至声明全局变量，这样很容易导致代码混乱难以管理。<br>全局导入模式是匿名闭包的一个变种，增加参数导入全局变量，约定在匿名函数内部只能通过导入的参数访问外部的模块，从而使模块间的依赖清晰，便于管理。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">$, YAHOO</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// now have access to globals jQuery (as $) and YAHOO in this code</span></span><br><span class="line">&#125;(jQuery, YAHOO));</span><br></pre></td></tr></table></figure></p>
 <p>这种约定不能强制阻止函数体内部访问全局变量，其中一个解决方案是把所有的模块都使用这种方式处理，仅把模块本身导出到全局变量，这样就可以极大减少全局变量的使用。</p>
@@ -440,7 +440,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -450,7 +450,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
